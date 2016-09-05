@@ -7,12 +7,19 @@
 #? do not delete, show only
 #? action: list/show, delete, rename?, move?
 #? sys.stdout.isatty() --> if not, then no progress or no backtrack
-#? no progress
+#? no progress, silent
 #? a] master
 #? b] master copy
+#
+# dius
+# .] mk DEVELOP
+# 1ST
 # 1] MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
 # 2] BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
+# 2ND
+# -s --silent
 # .] 1.1, readme, changelog
+#
 
 import sys, time
 #--- argparse, enum, math, os, string
