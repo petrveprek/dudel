@@ -1,6 +1,18 @@
 #!python3
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
+#? keep MASTER reference original prototype source exemplar
+#? prune check search COPY target
+#? match sub-tree / filename / date-time / size / content
+#? do not delete, show only
+#? action: list/show, delete, rename?, move?
+#? sys.stdout.isatty() --> if not, then no progress or no backtrack
+#? no progress
+#? a] master
+#? b] master copy
+# 1] MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
+# 2] BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
+# .] 1.1, readme, changelog
 
 import sys, time
 #--- argparse, enum, math, os, string
