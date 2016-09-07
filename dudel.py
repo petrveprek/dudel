@@ -10,16 +10,6 @@
 #? no progress, silent
 #? a] master
 #? b] master copy
-#
-# dius
-# .] mk DEVELOP
-# 1ST
-# 1] MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
-# 2] BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
-# 2ND
-# -s --silent
-# .] 1.1, readme, changelog
-#
 
 import sys, time
 #--- argparse, enum, math, os, string
@@ -31,7 +21,7 @@ VERBOSE = False
 #---class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 #---MODE = Mode.gazillion
 #---MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
-#---MAX_WIDTH = os.get_terminal_size().columns
+#---MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
 #---WIDTH = MAX_WIDTH
 #---WIDTH = min(max(WIDTH, MIN_WIDTH), MAX_WIDTH)
 
@@ -81,31 +71,36 @@ def main():
 #---    parser.add_argument("directory", nargs="?", help="set top directory to analyze [%(default)s]", default=os.getcwd())
 #---    parser.add_argument("-c", "--count", help="set number of largest directories to show [%(default)s]", type=int, default=COUNT)
 #---    parser.add_argument("-w", "--width", help="set console width for progress indicator [%(default)s]", metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH)
+#---    parser.add_argument("-s", "--silent", help="suppress progress messages [false]", action = "store_true", default=False)
 #---    arguments = parser.parse_args()
 #---    directory = arguments.directory
 #---    count = arguments.count
 #---    width = arguments.width
+#---    silent = arguments.silent
 #---    
-#---    print("Analyzing {}".format(directory))
+#---    if not silent:
+#---        print("Analyzing {}".format(directory))
+#---        BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
 #---    started = time.time()
 #---    usage = {}
 #---    numFiles = 0
-#---    backtrack = "\r" if width < MAX_WIDTH else "\033[F"
 #---    for path, dirs, files in os.walk(directory):
-#---        print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=backtrack)
+#---        if not silent:
+#---            print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=BACKTRACK)
 #---        files = list(filter(os.path.isfile, map(lambda file: os.path.join(path, file), files)))
 #---        numFiles += len(files)
 #---        usage[path] = sum(map(os.path.getsize, files))
-#---    print("         {: <{}}".format("", width-9), end=backtrack)
-#---    seconds = max(1, round(time.time() - started))
-#---    dirRate = round(len(usage) / seconds, 1)
-#---    fileRate = round(numFiles / seconds, 1)
-#---    print("Found {} director{} with {} file{} in {} second{} ({} director{}/s, {} file{}/s)".format(
-#---        format(len(usage), mode=Mode.grouped), "y" if len(usage) == 1 else "ies",
-#---        format(numFiles, mode=Mode.grouped), "" if numFiles == 1 else "s",
-#---        format(seconds, mode=Mode.grouped), "" if seconds == 1 else "s",
-#---        format(dirRate, mode=Mode.grouped), "y" if dirRate == 1 else "ies",
-#---        format(fileRate, mode=Mode.grouped), "" if fileRate == 1 else "s"))
+#---    if not silent:
+#---        print("         {: <{}}".format("", width-9), end=BACKTRACK)
+#---        seconds = max(1, round(time.time() - started))
+#---        dirRate = round(len(usage) / seconds, 1)
+#---        fileRate = round(numFiles / seconds, 1)
+#---        print("Found {} director{} with {} file{} in {} second{} ({} director{}/s, {} file{}/s)".format(
+#---            format(len(usage), mode=Mode.grouped), "y" if len(usage) == 1 else "ies",
+#---            format(numFiles, mode=Mode.grouped), "" if numFiles == 1 else "s",
+#---            format(seconds, mode=Mode.grouped), "" if seconds == 1 else "s",
+#---            format(dirRate, mode=Mode.grouped), "y" if dirRate == 1 else "ies",
+#---            format(fileRate, mode=Mode.grouped), "" if fileRate == 1 else "s"))
 #---    
 #---    usage = sorted(usage.items(), key=lambda item:(-item[1], item[0]))
 #---    widthCount = places(len(usage), min=2, mode=Mode.grouped)
