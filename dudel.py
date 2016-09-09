@@ -1,6 +1,13 @@
 #!python3
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
+# dudel directory
+# dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
+# --find unique/duplicate(multiple)
+# --target file/directory
+# --match filename/extension/datetime/size/sha1-crc32-md5/content(byte-by-byte)
+# --action list(show)/delete/move/rename
+# --mode
 #? keep MASTER reference original prototype source exemplar
 #? prune check search COPY target
 #? match sub-tree / file name / extension / date-time / size / content
