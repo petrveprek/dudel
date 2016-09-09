@@ -3,8 +3,11 @@
 """Duplicate Delete"""
 #? keep MASTER reference original prototype source exemplar
 #? prune check search COPY target
-#? match sub-tree / filename / date-time / size / content
-#? do not delete, show only
+#? match sub-tree / file name / extension / date-time / size / content
+#? sh1 / md5 ... byte-by-byte (identical)
+#? interactive mode
+#? find unique|dup files|directories
+#? do not delete, show only | move to | rename
 #? action: list/show, delete, rename?, move?
 #? sys.stdout.isatty() --> if not, then no progress or no backtrack
 #? no progress, silent
