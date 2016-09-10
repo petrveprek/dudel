@@ -54,13 +54,15 @@ def main():
         start = time.time()
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
-    parser.add_argument("directory", nargs="?", help="set top directory to clean up [%(default)s]", default=os.getcwd())
-    parser.add_argument("-t", "--type", help="set type of item to be searched for and deleted [%(default)s]", choices=["file", "directory"], default="file")
-    parser.add_argument("-w", "--width", help="set console width for progress indicator [%(default)s]", metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH)
-    parser.add_argument("-s", "--silent", help="suppress progress messages [false]", action = "store_true", default=False)
+    parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
+    parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=["name", "datetime", "size"], default=["name", "datetime", "size"], help="set criteria to detect duplicate items [%(default)s]")
+    parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
+    parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     arguments = parser.parse_args()
     directory = arguments.directory
     type = arguments.type
+    match = arguments.match
     width = arguments.width
     silent = arguments.silent
     
@@ -101,12 +103,14 @@ def main():
         extra = 0
         for item in items[1:]:
 #            print(item)
-            if item.name != prevItem.name:
-                numUniq += 1
-                extra = 0
-            else:
+            if ("name"     not in match or item.name == prevItem.name) and \
+               ("datetime" not in match or True) and \
+               ("size"     not in match or True):
                 extra += 1
                 maxExtra = max(extra, maxExtra)
+            else:
+                numUniq += 1
+                extra = 0
             prevItem = item
     print("Found {} total item{}, {} unique item{}, {} max extra copies".format(
         len(items), "" if len(items) == 1 else "s",
@@ -129,8 +133,7 @@ if '__main__' == __name__:
 
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
-# --type(target) file/directory
-# --match filename/extension/datetime/size/sha1-crc32-md5/content(byte-by-byte)
+# --match /extension///sha1-crc32-md5/content(byte-by-byte)
 # --action list(show)/delete/move/rename
 # --mode
 #? keep MASTER reference original prototype source exemplar
