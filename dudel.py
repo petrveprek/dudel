@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, enum, os, string, sys, time
+import argparse, collections, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
 VERSION = "0.1"
@@ -55,25 +55,32 @@ def main():
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", help="set top directory to clean up [%(default)s]", default=os.getcwd())
+    parser.add_argument("-t", "--type", help="set type of item to be searched for and deleted [%(default)s]", choices=["file", "directory"], default="file")
     parser.add_argument("-w", "--width", help="set console width for progress indicator [%(default)s]", metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH)
     parser.add_argument("-s", "--silent", help="suppress progress messages [false]", action = "store_true", default=False)
     arguments = parser.parse_args()
     directory = arguments.directory
+    type = arguments.type
     width = arguments.width
     silent = arguments.silent
     
     if not silent:
-        print("Analyzing {}".format(directory))
+        print("Analyzing {} under {}".format("files" if type == "file" else "directories", directory))
         BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
+    Item = collections.namedtuple('Item', ['name', 'location'])
+    items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
             print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=BACKTRACK)
-        dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.join(path, dir),  dirs)))
-        files = list(filter(os.path.isfile, map(lambda file: os.path.join(path, file), files)))
+        dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.abspath(os.path.join(path, dir)),  dirs)))
+        files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
         numFiles += len(files)
+        for element in files if type == "file" else dirs:
+            location, name = os.path.split(element)
+            items.append(Item(name=name, location=location))
     if not silent:
         print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
@@ -85,6 +92,26 @@ def main():
             format(seconds,  mode=Mode.grouped), ""  if seconds  == 1 else "s",
             format(dirRate,  mode=Mode.grouped), "y" if dirRate  == 1 else "ies",
             format(fileRate, mode=Mode.grouped), ""  if fileRate == 1 else "s"))
+    
+    items.sort(key=lambda item:(item.name, item.location))
+    numUniq, maxExtra = (0,) * 2
+    if len(items) > 0:
+        numUniq = 1
+        prevItem = items[0]
+        extra = 0
+        for item in items[1:]:
+#            print(item)
+            if item.name != prevItem.name:
+                numUniq += 1
+                extra = 0
+            else:
+                extra += 1
+                maxExtra = max(extra, maxExtra)
+            prevItem = item
+    print("Found {} total item{}, {} unique item{}, {} max extra copies".format(
+        len(items), "" if len(items) == 1 else "s",
+        numUniq,    "" if numUniq    == 1 else "s",
+        maxExtra,   "" if maxExtra   == 1 else "s"))
     
     if VERBOSE:
         elapsed = time.time() - start
@@ -100,7 +127,6 @@ def main():
 if '__main__' == __name__:
     main()
 
-# dudel directory
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
 # --type(target) file/directory
