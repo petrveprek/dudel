@@ -2,16 +2,25 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, sys, time
+import argparse, os, string, sys, time
 
 TITLE = "Duplicate Delete"
 VERSION = "0.1"
 VERBOSE = False
+MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
+MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
+WIDTH = MAX_WIDTH
+WIDTH = min(max(WIDTH, MIN_WIDTH), MAX_WIDTH)
 
 def now(on="on", at="at"):
     return "{}{} {}{}".format(
         on + " " if on != "" else "", time.strftime("%Y-%m-%d"),
         at + " " if at != "" else "", time.strftime("%H:%M:%S"))
+
+def printable(str, max):
+    str = "".join([char if char in string.printable else "_" for char in str])
+    if len(str) > max: str = str[:max-3] + "..."
+    return str
 
 def main():
     print("{} {}".format(TITLE, VERSION))
@@ -23,32 +32,23 @@ def main():
         print("Executed {}".format(now()))
         start = time.time()
     
-    parser = argparse.ArgumentParser(description="delete dups")
-    parser.add_argument("-c", "--common", help="shared")
-    subparsers = parser.add_subparsers(help="sub-command help")
-    parserOneDir = subparsers.add_parser("dir", help="help1")
-    parserOneDir.add_argument("-1", "--one", help="opt1")
-    parserTwoDirs = subparsers.add_parser("dir1 dir2", help="help2")
-    parserTwoDirs.add_argument("-2", "--two", help="opt2")
-## create the parser for the "a" command
-#parser_a = subparsers.add_parser('a', help='a help')
-#parser_a.add_argument("--opt1", action='store_true')
-#parser_a.add_argument("--opt2", action='store_true')
-#
-## create the parser for the "b" command
-#parser_b = subparsers.add_parser('b', help='b help')
-#parser_b.add_argument("--opt3", action='store_true')
-#parser_b.add_argument("--opt4", action='store_true')
-#xx
-#---    parser.add_argument("directory", nargs="?", help="set top directory to analyze [%(default)s]", default=os.getcwd())
-#---    parser.add_argument("-c", "--count", help="set number of largest directories to show [%(default)s]", type=int, default=COUNT)
-#---    parser.add_argument("-w", "--width", help="set console width for progress indicator [%(default)s]", metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH)
-#---    parser.add_argument("-s", "--silent", help="suppress progress messages [false]", action = "store_true", default=False)
+    parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
+    parser.add_argument("directory", nargs="?", help="set top directory to clean up [%(default)s]", default=os.getcwd())
+    parser.add_argument("-w", "--width", help="set console width for progress indicator [%(default)s]", metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH)
+    parser.add_argument("-s", "--silent", help="suppress progress messages [false]", action = "store_true", default=False)
     arguments = parser.parse_args()
-#---    directory = arguments.directory
-#---    count = arguments.count
-#---    width = arguments.width
-#---    silent = arguments.silent
+    directory = arguments.directory
+    width = arguments.width
+    silent = arguments.silent
+    
+    if not silent:
+        print("Analyzing {}".format(directory))
+        BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
+    for path, dirs, files in os.walk(directory):
+        if not silent:
+            print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=BACKTRACK)
+    if not silent:
+        print("         {: <{}}".format("", width-9), end=BACKTRACK)
     
     if VERBOSE:
         elapsed = time.time() - start
