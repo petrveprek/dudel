@@ -8,7 +8,6 @@ TITLE = "Duplicate Delete"
 VERSION = "0.1"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
-MODE = Mode.gazillion
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
 MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
 WIDTH = MAX_WIDTH
@@ -56,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
     parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
-    parser.add_argument("-m", "--match", nargs="+", choices=["name", "datetime", "size"], default=["name", "datetime", "size"], help="set criteria to detect duplicate items [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default="name time size", help="set criteria to detect duplicate items [%(default)s]")
     parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     arguments = parser.parse_args()
@@ -67,11 +66,11 @@ def main():
     silent = arguments.silent
     
     if not silent:
-        print("Analyzing {} under {}".format("files" if type == "file" else "directories", directory))
+        print("Scanning {} under {}".format("files" if type == "file" else "directories", directory))
         BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
-    Item = collections.namedtuple('Item', ['name', 'location'])
+    Item = collections.namedtuple('Item', ['name', 'location', 'time', 'size'])
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
@@ -82,7 +81,9 @@ def main():
         numFiles += len(files)
         for element in files if type == "file" else dirs:
             location, name = os.path.split(element)
-            items.append(Item(name=name, location=location))
+            time_ = os.path.getmtime(element)
+            size = os.path.getsize(element)
+            items.append(Item(name=name, location=location, time=time_, size=size))
     if not silent:
         print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
@@ -103,9 +104,9 @@ def main():
         extra = 0
         for item in items[1:]:
 #            print(item)
-            if ("name"     not in match or item.name == prevItem.name) and \
-               ("datetime" not in match or True) and \
-               ("size"     not in match or True):
+            if ("name" not in match or item.name == prevItem.name) and \
+               ("time" not in match or True) and \
+               ("size" not in match or True):
                 extra += 1
                 maxExtra = max(extra, maxExtra)
             else:
@@ -131,6 +132,7 @@ def main():
 if '__main__' == __name__:
     main()
 
+# printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
 # --match /extension///sha1-crc32-md5/content(byte-by-byte)
