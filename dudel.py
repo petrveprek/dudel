@@ -97,7 +97,7 @@ def main():
             format(fileRate, mode=Mode.grouped), ""  if fileRate == 1 else "s"))
     
     items.sort(key=lambda item:(item.name, item.location, item.time, item.size))
-    numUniqs, numDups, numGroups, maxExtra = (0,) * 4
+    numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
     if len(items) > 0:
         numUniqs = 1
         extra = 0
@@ -112,14 +112,16 @@ def main():
                     numGroups += 1
                 extra += 1
                 maxExtra = max(extra, maxExtra)
+                sizeDups += item.size
             else:
                 numUniqs += 1
                 extra = 0
+                sizeUniqs += item.size
             prevItem = item
-    print("Found {} total item{}, {} unique item{}, {} duplicated item{}, {} group{} with repeats, max {} extra cop{} in a group".format(
-        format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s",
-        format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s",
-        format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s",
+    print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+        format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s", format(sizeUniqs+sizeDups, mode=Mode.gazillion),
+        format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s", format(sizeUniqs,          mode=Mode.gazillion),
+        format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s", format(sizeDups,           mode=Mode.gazillion),
         format(numGroups,  mode=Mode.grouped), ""  if numGroups  == 1 else "s",
         format(maxExtra,   mode=Mode.grouped), "y" if maxExtra   == 1 else "ies"))
     
