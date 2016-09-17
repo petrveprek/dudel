@@ -70,7 +70,7 @@ def main():
         BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
-    Item = collections.namedtuple('Item', ['name', 'location', 'time', 'size'])
+    Item = collections.namedtuple('Item', ['location', 'name', 'time', 'size'])
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
@@ -81,9 +81,9 @@ def main():
         numFiles += len(files)
         for element in files if type == "file" else dirs:
             location, name = os.path.split(element)
-            time_ = os.path.getmtime(element)
+            mtime = os.path.getmtime(element)
             size = os.path.getsize(element)
-            items.append(Item(name=name, location=location, time=time_, size=size))
+            items.append(Item(location=location, name=name, time=mtime, size=size))
     if not silent:
         print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
@@ -96,27 +96,30 @@ def main():
             format(dirRate,  mode=Mode.grouped), "y" if dirRate  == 1 else "ies",
             format(fileRate, mode=Mode.grouped), ""  if fileRate == 1 else "s"))
     
-    items.sort(key=lambda item:(item.name, item.location))
-    numUniq, maxExtra = (0,) * 2
+    items.sort(key=lambda item:(item.name, item.location, item.time, item.size))
+    numUniqs, numGroups, maxExtra = (0,) * 3
     if len(items) > 0:
-        numUniq = 1
-        prevItem = items[0]
+        numUniqs = 1
         extra = 0
+        prevItem = items[0]
         for item in items[1:]:
 #            print(item)
             if ("name" not in match or item.name == prevItem.name) and \
-               ("time" not in match or True) and \
-               ("size" not in match or True):
+               ("time" not in match or item.time == prevItem.time) and \
+               ("size" not in match or item.size == prevItem.size):
+                if extra == 0:
+                    numGroups += 1
                 extra += 1
                 maxExtra = max(extra, maxExtra)
             else:
-                numUniq += 1
+                numUniqs += 1
                 extra = 0
             prevItem = item
-    print("Found {} total item{}, {} unique item{}, {} max extra copies".format(
-        len(items), "" if len(items) == 1 else "s",
-        numUniq,    "" if numUniq    == 1 else "s",
-        maxExtra,   "" if maxExtra   == 1 else "s"))
+    print("Found {} total item{}, {} unique item{}, {} group{} with repeats, max {} extra cop{} in a group".format(
+        len(items), ""  if len(items) == 1 else "s",
+        numUniqs,   ""  if numUniqs   == 1 else "s",
+        numGroups,  ""  if numGroups  == 1 else "s",
+        maxExtra,   "y" if maxExtra   == 1 else "ies"))
     
     if VERBOSE:
         elapsed = time.time() - start
