@@ -54,16 +54,18 @@ def main():
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
-    parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
+    parser.add_argument("-a", "--action", choices=["summary"], default="summary", help="set action to perform on found items [%(default)s]")
     parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default="name time size", help="set criteria to detect duplicate items [%(default)s]")
-    parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
+    parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
+    parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
     arguments = parser.parse_args()
     directory = arguments.directory
-    type = arguments.type
+    action = arguments.action
     match = arguments.match
-    width = arguments.width
+    type = arguments.type
     silent = arguments.silent
+    width = arguments.width
     
     if not silent:
         print("Scanning {} under {}".format("files" if type == "file" else "directories", directory))
@@ -103,7 +105,6 @@ def main():
         extra = 0
         prevItem = items[0]
         for item in items[1:]:
-#            print(item)
             if ("name" not in match or item.name == prevItem.name) and \
                ("time" not in match or item.time == prevItem.time) and \
                ("size" not in match or item.size == prevItem.size):
@@ -118,12 +119,17 @@ def main():
                 extra = 0
                 sizeUniqs += item.size
             prevItem = item
-    print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
-        format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s", format(sizeUniqs+sizeDups, mode=Mode.gazillion),
-        format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s", format(sizeUniqs,          mode=Mode.gazillion),
-        format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s", format(sizeDups,           mode=Mode.gazillion),
-        format(numGroups,  mode=Mode.grouped), ""  if numGroups  == 1 else "s",
-        format(maxExtra,   mode=Mode.grouped), "y" if maxExtra   == 1 else "ies"))
+    if not silent:
+        print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+            format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s", format(sizeUniqs+sizeDups, mode=Mode.gazillion),
+            format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s", format(sizeUniqs,          mode=Mode.gazillion),
+            format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s", format(sizeDups,           mode=Mode.gazillion),
+            format(numGroups,  mode=Mode.grouped), ""  if numGroups  == 1 else "s",
+            format(maxExtra,   mode=Mode.grouped), "y" if maxExtra   == 1 else "ies"))
+    if action == "summary": # also make it default
+        print("Path {}".format(os.path.abspath(directory)))
+        print("Directories {}".format(format(numDirs,  mode=Mode.grouped)))
+        print("Files {}".format(format(numFiles,  mode=Mode.grouped)))
     
     if VERBOSE:
         elapsed = time.time() - start
@@ -152,9 +158,10 @@ if '__main__' == __name__:
 #? interactive mode
 #? find unique|dup files|directories
 #? do not delete, show only | move to | rename
-#? action: list/show, delete, rename?, move?
+#? action: summary/list/show, delete, rename?, move?
 #? sys.stdout.isatty() --> if not, then no progress or no backtrack
 #? no progress, silent
 #? a] master
 #? b] master copy
+#? force
 # prune / sort / save md5 et al / keep empty dirs / STATS
