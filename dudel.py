@@ -92,11 +92,11 @@ def main():
         dirRate  = round(numDirs  / seconds, 1)
         fileRate = round(numFiles / seconds, 1)
         print("Found {} director{} with {} file{} in {} second{} ({} director{}/s, {} file{}/s)".format(
-            format(numDirs,  mode=Mode.grouped), "y" if numDirs  == 1 else "ies",
-            format(numFiles, mode=Mode.grouped), ""  if numFiles == 1 else "s",
-            format(seconds,  mode=Mode.grouped), ""  if seconds  == 1 else "s",
-            format(dirRate,  mode=Mode.grouped), "y" if dirRate  == 1 else "ies",
-            format(fileRate, mode=Mode.grouped), ""  if fileRate == 1 else "s"))
+            grouped(numDirs),  "y" if numDirs  == 1 else "ies",
+            grouped(numFiles), ""  if numFiles == 1 else "s",
+            grouped(seconds),  ""  if seconds  == 1 else "s",
+            grouped(dirRate),  "y" if dirRate  == 1 else "ies",
+            grouped(fileRate), ""  if fileRate == 1 else "s"))
     
     items.sort(key=lambda item:(item.name, item.location, item.time, item.size))
     numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
@@ -121,15 +121,15 @@ def main():
             prevItem = item
     if not silent:
         print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
-            format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s", format(sizeUniqs+sizeDups, mode=Mode.gazillion),
-            format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s", format(sizeUniqs,          mode=Mode.gazillion),
-            format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s", format(sizeDups,           mode=Mode.gazillion),
-            format(numGroups,  mode=Mode.grouped), ""  if numGroups  == 1 else "s",
-            format(maxExtra,   mode=Mode.grouped), "y" if maxExtra   == 1 else "ies"))
     if action == "summary": # also make it default
         print("Path {}".format(os.path.abspath(directory)))
         print("Directories {}".format(format(numDirs,  mode=Mode.grouped)))
         print("Files {}".format(format(numFiles,  mode=Mode.grouped)))
+            grouped(len(items)), ""  if len(items) == 1 else "s", gazillion(sizeUniqs+sizeDups),
+            grouped(numUniqs),   ""  if numUniqs   == 1 else "s", gazillion(sizeUniqs),
+            grouped(numDups),    ""  if numDups    == 1 else "s", gazillion(sizeDups),
+            grouped(numGroups),  ""  if numGroups  == 1 else "s",
+            grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
     if VERBOSE:
         elapsed = time.time() - start
