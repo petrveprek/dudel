@@ -119,17 +119,35 @@ def main():
                 extra = 0
                 sizeUniqs += item.size
             prevItem = item
+    assert numUniqs + numDups == len(items)
     if not silent:
         print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
-    if action == "summary": # also make it default
-        print("Path {}".format(os.path.abspath(directory)))
-        print("Directories {}".format(format(numDirs,  mode=Mode.grouped)))
-        print("Files {}".format(format(numFiles,  mode=Mode.grouped)))
             grouped(len(items)), ""  if len(items) == 1 else "s", gazillion(sizeUniqs+sizeDups),
             grouped(numUniqs),   ""  if numUniqs   == 1 else "s", gazillion(sizeUniqs),
             grouped(numDups),    ""  if numDups    == 1 else "s", gazillion(sizeDups),
             grouped(numGroups),  ""  if numGroups  == 1 else "s",
             grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
+    
+    if action == "summary": # default
+        col1 = max(map(len, ["Directory", "Full path"]))
+        col2 = max(map(len, [directory, os.path.abspath(directory)]))
+        lineBreak = "+-{:-<{}}-+-{:-<{}}-+".format("", col1, "", col2)
+        print(lineBreak)
+        print("| {: <{}} | {: <{}} |".format("Directory", col1, directory,                  col2))
+        print(lineBreak)
+        print("| {: <{}} | {: <{}} |".format("Full path", col1, os.path.abspath(directory), col2))
+        print(lineBreak)
+        col1 = max(map(len, ["", "Directories", "Files"]))
+        col2 = max(map(len, ["Count", grouped(numDirs), grouped(numFiles)]))
+        lineBreak = "+-{:-<{}}-+-{:-<{}}-+".format("", col1, "", col2)
+        headingBreak = "+={:=<{}}=+={:=<{}}=+".format("", col1, "", col2)
+        print(lineBreak)
+        print("| {: <{}} | {: >{}} |".format("",            col1, "Count",           col2))
+        print(headingBreak)
+        print("| {: <{}} | {: >{}} |".format("Directories", col1, grouped(numDirs),  col2))
+        print(lineBreak)
+        print("| {: <{}} | {: >{}} |".format("Files",       col1, grouped(numFiles), col2))
+        print(lineBreak)
     
     if VERBOSE:
         elapsed = time.time() - start
