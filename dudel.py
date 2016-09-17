@@ -97,7 +97,7 @@ def main():
             format(fileRate, mode=Mode.grouped), ""  if fileRate == 1 else "s"))
     
     items.sort(key=lambda item:(item.name, item.location, item.time, item.size))
-    numUniqs, numGroups, maxExtra = (0,) * 3
+    numUniqs, numDups, numGroups, maxExtra = (0,) * 4
     if len(items) > 0:
         numUniqs = 1
         extra = 0
@@ -107,6 +107,7 @@ def main():
             if ("name" not in match or item.name == prevItem.name) and \
                ("time" not in match or item.time == prevItem.time) and \
                ("size" not in match or item.size == prevItem.size):
+                numDups += 1
                 if extra == 0:
                     numGroups += 1
                 extra += 1
@@ -115,11 +116,12 @@ def main():
                 numUniqs += 1
                 extra = 0
             prevItem = item
-    print("Found {} total item{}, {} unique item{}, {} group{} with repeats, max {} extra cop{} in a group".format(
-        len(items), ""  if len(items) == 1 else "s",
-        numUniqs,   ""  if numUniqs   == 1 else "s",
-        numGroups,  ""  if numGroups  == 1 else "s",
-        maxExtra,   "y" if maxExtra   == 1 else "ies"))
+    print("Found {} total item{}, {} unique item{}, {} duplicated item{}, {} group{} with repeats, max {} extra cop{} in a group".format(
+        format(len(items), mode=Mode.grouped), ""  if len(items) == 1 else "s",
+        format(numUniqs,   mode=Mode.grouped), ""  if numUniqs   == 1 else "s",
+        format(numDups,    mode=Mode.grouped), ""  if numDups    == 1 else "s",
+        format(numGroups,  mode=Mode.grouped), ""  if numGroups  == 1 else "s",
+        format(maxExtra,   mode=Mode.grouped), "y" if maxExtra   == 1 else "ies"))
     
     if VERBOSE:
         elapsed = time.time() - start
@@ -139,7 +141,7 @@ if '__main__' == __name__:
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
 # --match /extension///sha1-crc32-md5/content(byte-by-byte)
-# --action list(show)/delete/move/rename
+# --action scan~~list(show)/delete/move/rename
 # --mode
 #? keep MASTER reference original prototype source exemplar
 #? prune check search COPY target
