@@ -55,7 +55,7 @@ def main():
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
     parser.add_argument("-a", "--action", choices=["summary"], default="summary", help="set action to perform on found items [%(default)s]")
-    parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default="name time size", help="set criteria to detect duplicate items [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default=["name", "time", "size"], help="set criteria to detect duplicate items [%(default)s]")
     parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
