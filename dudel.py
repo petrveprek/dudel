@@ -98,7 +98,14 @@ def main():
             grouped(dirRate),  "y" if dirRate  == 1 else "ies",
             grouped(fileRate), ""  if fileRate == 1 else "s"))
     
-    items.sort(key=lambda item:(item.name, item.location, item.time, item.size))
+    items.sort(key=lambda item:
+        ((item.name,) if "name" in match else ()) +
+        ((item.time,) if "time" in match else ()) +
+        ((item.size,) if "size" in match else ()) +
+        ((item.name,) if "name" not in match else ()) +
+        ((item.time,) if "time" not in match else ()) +
+        ((item.size,) if "size" not in match else ()) +
+        ((item.location,)))
     numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
     if len(items) > 0:
         numUniqs = 1
