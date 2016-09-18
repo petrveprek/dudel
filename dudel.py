@@ -42,6 +42,33 @@ def format(num, mode=Mode.plain):
         gazillion(num) if mode == Mode.gazillion else
         plain(num))
 
+def tabulated(table, numHeaderRows=0, columnAlign=[]):
+    numRows = len(table)
+    numCols = len(table[0])
+    colWidths = [max(len(table[row][col]) for row in range(numRows)) for col in range(numCols)]
+    rowSep = "+" + "".join("-{:-<{}}-+".format("", colWidths[col]) for col in range(numCols)) + "\n"
+    headerSep = "".join([char if char != "-" else "=" for char in rowSep])
+    return \
+        rowSep + \
+        "".join(
+            "|" +
+            "".join((
+                " {: " + (((
+                        "<" if columnAlign[col] == 'left' else
+                        ">" if columnAlign[col] == 'right' else
+                        "^"
+                        ) if col < len(columnAlign) else "^"
+                    ) if row < numHeaderRows else (
+                        "<" if columnAlign[col] == 'left' else
+                        ">" if columnAlign[col] == 'right' else
+                        "<"
+                    ) if col < len(columnAlign) else "<"
+                ) + "{}} |"
+            ).format(table[row][col], colWidths[col]) for col in range(numCols)) +
+            "\n" +
+            (headerSep if row < numHeaderRows else rowSep)
+            for row in range(numRows))
+
 def main():
     print("{} {}".format(TITLE, VERSION))
     if VERBOSE:
@@ -136,25 +163,17 @@ def main():
             grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
     if action == "summary": # default
-        col1 = max(map(len, ["Directory", "Full path"]))
-        col2 = max(map(len, [directory, os.path.abspath(directory)]))
-        lineBreak = "+-{:-<{}}-+-{:-<{}}-+".format("", col1, "", col2)
-        print(lineBreak)
-        print("| {: <{}} | {: <{}} |".format("Directory", col1, directory,                  col2))
-        print(lineBreak)
-        print("| {: <{}} | {: <{}} |".format("Full path", col1, os.path.abspath(directory), col2))
-        print(lineBreak)
-        col1 = max(map(len, ["", "Directories", "Files"]))
-        col2 = max(map(len, ["Count", grouped(numDirs), grouped(numFiles)]))
-        lineBreak = "+-{:-<{}}-+-{:-<{}}-+".format("", col1, "", col2)
-        headingBreak = "+={:=<{}}=+={:=<{}}=+".format("", col1, "", col2)
-        print(lineBreak)
-        print("| {: <{}} | {: >{}} |".format("",            col1, "Count",           col2))
-        print(headingBreak)
-        print("| {: <{}} | {: >{}} |".format("Directories", col1, grouped(numDirs),  col2))
-        print(lineBreak)
-        print("| {: <{}} | {: >{}} |".format("Files",       col1, grouped(numFiles), col2))
-        print(lineBreak)
+        print(tabulated([
+            ["Directory", directory],
+            ["Full path", os.path.abspath(directory)]]),
+            end="")
+        print(tabulated([
+            ["",            "Count"],
+            ["Directories", grouped(numDirs)],
+            ["Files",       grouped(numFiles)]],
+            numHeaderRows = 1,
+            columnAlign = ['left'] + ['right'] * 1),
+            end="")
     
     if VERBOSE:
         elapsed = time.time() - start
