@@ -174,6 +174,16 @@ def main():
             numHeaderRows = 1,
             columnAlign = ['left'] + ['right'] * 1),
             end="")
+        print(tabulated([
+            ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
+            ["Total",                                      grouped(numUniqs+numDups),  gazillion(sizeUniqs+sizeDups), "100.0%"],
+            ["Unique",                                     grouped(numUniqs),          gazillion(sizeUniqs),          "{:.1%}".format(sizeUniqs/(sizeUniqs+sizeDups))],
+            ["Duplicated",                                 grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups))],
+            ["Groups",                                     grouped(numGroups),         "-",                           "-"],
+            ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
+            numHeaderRows = 1,
+            columnAlign = ['left'] + ['right'] * 3),
+            end="")
     
     if VERBOSE:
         elapsed = time.time() - start
