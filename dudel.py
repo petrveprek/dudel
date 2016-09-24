@@ -46,28 +46,18 @@ def tabulated(table, numHeaderRows=0, columnAlign=[]):
     numRows = len(table)
     numCols = len(table[0])
     colWidths = [max(len(table[row][col]) for row in range(numRows)) for col in range(numCols)]
-    rowSep = "+" + "".join("-{:-<{}}-+".format("", colWidths[col]) for col in range(numCols)) + "\n"
-    headerSep = "".join([char if char != "-" else "=" for char in rowSep])
-    return \
-        rowSep + \
-        "".join(
-            "|" +
-            "".join((
-                " {: " + (((
-                        "<" if columnAlign[col] == 'left' else
-                        ">" if columnAlign[col] == 'right' else
-                        "^"
-                        ) if col < len(columnAlign) else "^"
-                    ) if row < numHeaderRows else (
-                        "<" if columnAlign[col] == 'left' else
-                        ">" if columnAlign[col] == 'right' else
-                        "<"
-                    ) if col < len(columnAlign) else "<"
-                ) + "{}} |"
-            ).format(table[row][col], colWidths[col]) for col in range(numCols)) +
-            "\n" +
-            (headerSep if row < numHeaderRows else rowSep)
-            for row in range(numRows))
+    headerSep = "+" + "".join("={:=<{}}=+".format("", colWidths[col]) for col in range(numCols)) + "\n"
+    rowSep = "".join([char if char != "=" else "-" for char in headerSep])
+    headerFmt = "|" + "".join(" {: " + ((
+        "<" if columnAlign[col] == 'left' else
+        ">" if columnAlign[col] == 'right' else
+        "^") if col < len(columnAlign) else "^") +
+        str(colWidths[col]) + "} |" for col in range(numCols)) + "\n"
+    rowFmt = "".join([char if char != "^" else "<" for char in headerFmt])
+    return rowSep + "".join(
+        (headerFmt if row < numHeaderRows else rowFmt).format(*table[row]) + \
+        (headerSep if row < numHeaderRows else rowSep) \
+        for row in range(numRows))
 
 def main():
     print("{} {}".format(TITLE, VERSION))
@@ -173,6 +163,16 @@ def main():
             ["Files",       grouped(numFiles)]],
             numHeaderRows = 1,
             columnAlign = ['left'] + ['right'] * 1),
+            end="")
+        print(tabulated([
+            ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
+            ["Total",                                      grouped(numUniqs+numDups),  gazillion(sizeUniqs+sizeDups), "100.0%"],
+            ["Unique",                                     grouped(numUniqs),          gazillion(sizeUniqs),          "{:.1%}".format(sizeUniqs/(sizeUniqs+sizeDups))],
+            ["Duplicated",                                 grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups))],
+            ["Groups",                                     grouped(numGroups),         "-",                           "-"],
+            ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
+            numHeaderRows = 1,
+            columnAlign = ['left'] + ['right'] * 3),
             end="")
     
     if VERBOSE:
