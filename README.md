@@ -39,8 +39,8 @@ optional arguments:
 >dudel.py \Windows
 Duplicate Delete 0.1
 Scanning files under \Windows
-Found 26,082 directories with 131,577 files in 109 seconds (239.3 directories/s, 1,207.1 files/s)
-Found 131,577 total items (34.3GiB), 94,359 unique items (21.9GiB), 37,218 duplicated items (12.5GiB), 27,858 groups with repeats, max 63 extra copies in a group
+Found 23,175 directories with 115,001 files in 59 seconds (392.8 directories/s, 1,949.2 files/s)
+Found 115,001 total items (50.2GiB), 78,706 unique items (23.2GiB), 36,295 duplicated items (27.0GiB), 26,883 groups with repeats, max 63 extra copies in a group
 +-----------+------------+
 | Directory | \Windows   |
 +-----------+------------+
@@ -49,20 +49,20 @@ Found 131,577 total items (34.3GiB), 94,359 unique items (21.9GiB), 37,218 dupli
 +-------------+---------+
 |             |   Count |
 +=============+=========+
-| Directories |  26,082 |
+| Directories |  23,175 |
 +-------------+---------+
-| Files       | 131,577 |
+| Files       | 115,001 |
 +-------------+---------+
 +------------+---------+---------+---------+
 | Files      |   Count |    Size | Percent |
 +============+=========+=========+=========+
-| Total      | 131,577 | 34.3GiB |  100.0% |
+| Total      | 115,001 | 50.2GiB |  100.0% |
 +------------+---------+---------+---------+
-| Unique     |  94,359 | 21.9GiB |   63.6% |
+| Unique     |  78,706 | 23.2GiB |   46.2% |
 +------------+---------+---------+---------+
-| Duplicated |  37,218 | 12.5GiB |   36.4% |
+| Duplicated |  36,295 | 27.0GiB |   53.8% |
 +------------+---------+---------+---------+
-| Groups     |  27,858 |       - |       - |
+| Groups     |  26,883 |       - |       - |
 +------------+---------+---------+---------+
 | Max extra  |      63 |       - |       - |
 +------------+---------+---------+---------+
