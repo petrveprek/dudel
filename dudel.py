@@ -89,7 +89,7 @@ def main():
         BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
-    Item = collections.namedtuple('Item', ['location', 'name', 'time', 'size'])
+    Item = collections.namedtuple('Item', ['location', 'name', 'time', 'size', 'group'])
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
@@ -102,7 +102,7 @@ def main():
             location, name = os.path.split(element)
             mtime = os.path.getmtime(element)
             size = os.path.getsize(element)
-            items.append(Item(location=location, name=name, time=mtime, size=size))
+            items.append(Item(location=location, name=name, time=mtime, size=size, group=None))
     if not silent:
         print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
@@ -127,6 +127,7 @@ def main():
     if len(items) > 0:
         numUniqs = 1
         extra = 0
+        items[0] = items[0]._replace(group = numUniqs-1)
         prevItem = items[0]
         for item in items[1:]:
             if ("name" not in match or item.name == prevItem.name) and \
@@ -142,6 +143,7 @@ def main():
                 numUniqs += 1
                 extra = 0
                 sizeUniqs += item.size
+            item = item._replace(group = numUniqs-1)
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
