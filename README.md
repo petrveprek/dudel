@@ -23,8 +23,8 @@ optional arguments:
   -a {summary}, --action {summary}
                         set action to perform on found items [summary]
   -m {name,time,size} [{name,time,size} ...], --match {name,time,size} [{name,time,size} ...]
-                        set criteria to detect duplicate items [['name',
-                        'time', 'size']]
+                        set criteria to detect duplicate items [name time
+                        size]
   -t {file,directory}, --type {file,directory}
                         set type of items to be searched for and deleted
                         [file]
@@ -39,8 +39,8 @@ optional arguments:
 >dudel.py \Windows
 Duplicate Delete 0.1
 Scanning files under \Windows
-Found 23,175 directories with 115,001 files in 59 seconds (392.8 directories/s, 1,949.2 files/s)
-Found 115,001 total items (50.2GiB), 78,706 unique items (23.2GiB), 36,295 duplicated items (27.0GiB), 26,883 groups with repeats, max 63 extra copies in a group
+Found 23,184 directories with 115,027 files in 48 seconds (483.0 directories/s, 2,396.4 files/s)
+Found 115,027 total items (50.2GiB), 78,732 unique items (23.2GiB), 36,295 duplicated items (27.0GiB), 26,883 groups with repeats, max 63 extra copies in a group
 +-----------+------------+
 | Directory | \Windows   |
 +-----------+------------+
@@ -49,16 +49,16 @@ Found 115,001 total items (50.2GiB), 78,706 unique items (23.2GiB), 36,295 dupli
 +-------------+---------+
 |             |   Count |
 +=============+=========+
-| Directories |  23,175 |
+| Directories |  23,184 |
 +-------------+---------+
-| Files       | 115,001 |
+| Files       | 115,027 |
 +-------------+---------+
 +------------+---------+---------+---------+
 | Files      |   Count |    Size | Percent |
 +============+=========+=========+=========+
-| Total      | 115,001 | 50.2GiB |  100.0% |
+| Total      | 115,027 | 50.2GiB |  100.0% |
 +------------+---------+---------+---------+
-| Unique     |  78,706 | 23.2GiB |   46.2% |
+| Unique     |  78,732 | 23.2GiB |   46.2% |
 +------------+---------+---------+---------+
 | Duplicated |  36,295 | 27.0GiB |   53.8% |
 +------------+---------+---------+---------+
