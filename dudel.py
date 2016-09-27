@@ -18,9 +18,9 @@ def now(on="on", at="at"):
         on + " " if on != "" else "", time.strftime("%Y-%m-%d"),
         at + " " if at != "" else "", time.strftime("%H:%M:%S"))
 
-def printable(str, max):
-    str = "".join([char if char in string.printable else "_" for char in str])
-    if len(str) > max: str = str[:max-3] + "..."
+def printable(str, max = None):
+    str = "".join([char if char in string.printable else "?" for char in str])
+    if max != None and len(str) > max: str = str[:max-3] + "..."
     return str
 
 def plain(num):
@@ -30,11 +30,11 @@ def grouped(num):
     return "{:,}".format(num)
 
 def gazillion(num, suffix="B"):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if num < 1024.0:
             return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, unit, suffix)
         num /= 1024.0
-    return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, 'Yi', suffix)
+    return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, "Yi", suffix)
 
 def format(num, mode=Mode.plain):
     return(
@@ -71,8 +71,8 @@ def main():
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
-    parser.add_argument("-a", "--action", choices=["summary"], default="summary", help="set action to perform on found items [%(default)s]")
-    parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default=["name", "time", "size"], help="set criteria to detect duplicate items ["+" ".join(["name", "time", "size"])+"]")
+    parser.add_argument("-a", "--action", choices=['summary', 'list'], default='summary', help="set action to perform on found items [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=['name', 'time', 'size'], default=['name', 'time', 'size'], help="set criteria to detect duplicate items ["+" ".join(['name', 'time', 'size'])+"]")
     parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
@@ -131,7 +131,7 @@ def main():
         items[0] = items[0]._replace(group=numUniqs-1, kind=Kind.master)
         print(items[0])
         prevItem = items[0]
-        for item in items[1:]:
+        for index, item in enumerate(items[1:]):
             if ("name" not in match or item.name == prevItem.name) and \
                ("time" not in match or item.time == prevItem.time) and \
                ("size" not in match or item.size == prevItem.size):
@@ -145,7 +145,7 @@ def main():
                 numUniqs += 1
                 extra = 0
                 sizeUniqs += item.size
-            item = item._replace(group=numUniqs-1, kind=Kind.master if extra == 0 else Kind.copy)
+            items[index] = item._replace(group=numUniqs-1, kind=Kind.master if extra == 0 else Kind.copy)
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
@@ -156,7 +156,7 @@ def main():
             grouped(numGroups),  ""  if numGroups  == 1 else "s",
             grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
-    if action == "summary": # default
+    if action in ['summary', 'list']:
         print(tabulated([
             ["Directory", directory],
             ["Full path", os.path.abspath(directory)]]),
