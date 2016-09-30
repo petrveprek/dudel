@@ -42,7 +42,7 @@ def format(num, mode=Mode.plain):
         gazillion(num) if mode == Mode.gazillion else
         plain(num))
 
-def tabulated(table, numHeaderRows=0, columnAlign=[]):
+def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     numRows = len(table)
     numCols = len(table[0])
     colWidths = [max(len(table[row][col]) for row in range(numRows)) for col in range(numCols)]
@@ -56,7 +56,7 @@ def tabulated(table, numHeaderRows=0, columnAlign=[]):
     rowFmt = "".join([char if char != "^" else "<" for char in headerFmt])
     return rowSep + "".join(
         (headerFmt if row < numHeaderRows else rowFmt).format(*table[row]) + \
-        (headerSep if row < numHeaderRows else rowSep) \
+        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") \
         for row in range(numRows))
 
 def main():
@@ -166,7 +166,8 @@ def main():
             ["Directories", grouped(numDirs)],
             ["Files",       grouped(numFiles)]],
             numHeaderRows = 1,
-            columnAlign = ['left'] + ['right'] * 1),
+            columnAlign = ['left'] + ['right'] * 1,
+            rowSeparator = [True]),
             end="")
         print(tabulated([
             ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
@@ -176,7 +177,9 @@ def main():
             ["Groups",                                     grouped(numGroups),         "-",                           "-"],
             ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
             numHeaderRows = 1,
-            columnAlign = ['left'] + ['right'] * 3),
+            columnAlign = ['left'] + ['right'] * 3,
+            rowSeparator = [True]),
+            end="")
             end="")
     
     if VERBOSE:
@@ -193,6 +196,7 @@ def main():
 if '__main__' == __name__:
     main()
 
+# argparse VS pipe redirect
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
