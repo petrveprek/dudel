@@ -180,6 +180,23 @@ def main():
             columnAlign = ['left'] + ['right'] * 3,
             rowSeparator = [True] * 6),
             end="")
+    if action == 'list':
+        data = [["Group", "Name", "Location"]]
+        groupEnd = [True]
+        for item in items:
+            if item.kind == Kind.copy:
+                if prevItem.kind == Kind.master:
+                    groupEnd[-1] = True
+                    data.append(["Master", printable(prevItem.name), printable(prevItem.location)])
+                    groupEnd.append(False)
+                data.append([grouped(item.group), printable(item.name), printable(item.location)])
+                groupEnd.append(False)
+            prevItem = item
+        groupEnd[-1] = True
+        print(tabulated(data,
+            numHeaderRows = 1,
+            columnAlign = ['right'] + ['left'] * 2,
+            rowSeparator = groupEnd),
             end="")
     
     if VERBOSE:
@@ -196,7 +213,10 @@ def main():
 if '__main__' == __name__:
     main()
 
+# separator at end e.g. header row but no data rows
 #['location', 'name', 'time', 'size', 'group', 'kind']
+# scanning progress: chop of top dir
+# master pick/selection: first alpha
 # dius printable _ -> ?
 # argparse VS pipe redirect
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
