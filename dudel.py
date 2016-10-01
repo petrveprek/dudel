@@ -18,7 +18,7 @@ def now(on="on", at="at"):
         on + " " if on != "" else "", time.strftime("%Y-%m-%d"),
         at + " " if at != "" else "", time.strftime("%H:%M:%S"))
 
-def printable(str, max = None):
+def printable(str, max=None):
     str = "".join([char if char in string.printable else "?" for char in str])
     if max != None and len(str) > max: str = str[:max-3] + "..."
     return str
@@ -128,8 +128,7 @@ def main():
     if len(items) > 0:
         numUniqs = 1
         extra = 0
-        items[0] = items[0]._replace(group=numUniqs-1, kind=Kind.master)
-        print(items[0])
+        items[0] = items[0]._replace(group=0, kind=Kind.master)
         prevItem = items[0]
         for index, item in enumerate(items[1:]):
             if ("name" not in match or item.name == prevItem.name) and \
@@ -145,7 +144,7 @@ def main():
                 numUniqs += 1
                 extra = 0
                 sizeUniqs += item.size
-            items[index] = item._replace(group=numUniqs-1, kind=Kind.master if extra == 0 else Kind.copy)
+            items[index] = item._replace(group=0 if extra == 0 else numGroups, kind=Kind.master if extra == 0 else Kind.copy)
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
@@ -159,7 +158,8 @@ def main():
     if action in ['summary', 'list']:
         print(tabulated([
             ["Directory", directory],
-            ["Full path", os.path.abspath(directory)]]),
+            ["Full path", os.path.abspath(directory)]],
+            rowSeparator = [True] * 2),
             end="")
         print(tabulated([
             ["",            "Count"],
@@ -167,7 +167,7 @@ def main():
             ["Files",       grouped(numFiles)]],
             numHeaderRows = 1,
             columnAlign = ['left'] + ['right'] * 1,
-            rowSeparator = [True]),
+            rowSeparator = [True] * 3),
             end="")
         print(tabulated([
             ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
@@ -178,7 +178,7 @@ def main():
             ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
             numHeaderRows = 1,
             columnAlign = ['left'] + ['right'] * 3,
-            rowSeparator = [True]),
+            rowSeparator = [True] * 6),
             end="")
             end="")
     
@@ -196,6 +196,8 @@ def main():
 if '__main__' == __name__:
     main()
 
+#['location', 'name', 'time', 'size', 'group', 'kind']
+# dius printable _ -> ?
 # argparse VS pipe redirect
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
