@@ -18,9 +18,9 @@ def now(on="on", at="at"):
         on + " " if on != "" else "", time.strftime("%Y-%m-%d"),
         at + " " if at != "" else "", time.strftime("%H:%M:%S"))
 
-def printable(str, max):
-    str = "".join([char if char in string.printable else "_" for char in str])
-    if len(str) > max: str = str[:max-3] + "..."
+def printable(str, max=None):
+    str = "".join([char if char in string.printable else "?" for char in str])
+    if max != None and len(str) > max: str = str[:max-3] + "..."
     return str
 
 def plain(num):
@@ -30,11 +30,11 @@ def grouped(num):
     return "{:,}".format(num)
 
 def gazillion(num, suffix="B"):
-    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if num < 1024.0:
             return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, unit, suffix)
         num /= 1024.0
-    return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, 'Yi', suffix)
+    return "{:.{}f}{}{}".format(num, 1 if num % 1 > 0 else 0, "Yi", suffix)
 
 def format(num, mode=Mode.plain):
     return(
@@ -42,7 +42,7 @@ def format(num, mode=Mode.plain):
         gazillion(num) if mode == Mode.gazillion else
         plain(num))
 
-def tabulated(table, numHeaderRows=0, columnAlign=[]):
+def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     numRows = len(table)
     numCols = len(table[0])
     colWidths = [max(len(table[row][col]) for row in range(numRows)) for col in range(numCols)]
@@ -56,7 +56,7 @@ def tabulated(table, numHeaderRows=0, columnAlign=[]):
     rowFmt = "".join([char if char != "^" else "<" for char in headerFmt])
     return rowSep + "".join(
         (headerFmt if row < numHeaderRows else rowFmt).format(*table[row]) + \
-        (headerSep if row < numHeaderRows else rowSep) \
+        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") \
         for row in range(numRows))
 
 def main():
@@ -71,8 +71,8 @@ def main():
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
-    parser.add_argument("-a", "--action", choices=["summary"], default="summary", help="set action to perform on found items [%(default)s]")
-    parser.add_argument("-m", "--match", nargs="+", choices=["name", "time", "size"], default=["name", "time", "size"], help="set criteria to detect duplicate items [%(default)s]")
+    parser.add_argument("-a", "--action", choices=['summary', 'list'], default='summary', help="set action to perform on found items [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=['name', 'time', 'size'], default=['name', 'time', 'size'], help="set criteria to detect duplicate items ["+" ".join(['name', 'time', 'size'])+"]")
     parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
@@ -89,7 +89,8 @@ def main():
         BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
-    Item = collections.namedtuple('Item', ['location', 'name', 'time', 'size'])
+    class Kind(enum.Enum): master = 0; copy = 1
+    Item = collections.namedtuple('Item', ['location', 'name', 'time', 'size', 'group', 'kind'])
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
@@ -102,7 +103,7 @@ def main():
             location, name = os.path.split(element)
             mtime = os.path.getmtime(element)
             size = os.path.getsize(element)
-            items.append(Item(location=location, name=name, time=mtime, size=size))
+            items.append(Item(location=location, name=name, time=mtime, size=size, group=None, kind=None))
     if not silent:
         print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
@@ -127,8 +128,9 @@ def main():
     if len(items) > 0:
         numUniqs = 1
         extra = 0
+        items[0] = items[0]._replace(group=0, kind=Kind.master)
         prevItem = items[0]
-        for item in items[1:]:
+        for index, item in enumerate(items[1:]):
             if ("name" not in match or item.name == prevItem.name) and \
                ("time" not in match or item.time == prevItem.time) and \
                ("size" not in match or item.size == prevItem.size):
@@ -142,6 +144,7 @@ def main():
                 numUniqs += 1
                 extra = 0
                 sizeUniqs += item.size
+            items[index] = item._replace(group=0 if extra == 0 else numGroups, kind=Kind.master if extra == 0 else Kind.copy)
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
@@ -152,17 +155,19 @@ def main():
             grouped(numGroups),  ""  if numGroups  == 1 else "s",
             grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
-    if action == "summary": # default
+    if action in ['summary', 'list']:
         print(tabulated([
             ["Directory", directory],
-            ["Full path", os.path.abspath(directory)]]),
+            ["Full path", os.path.abspath(directory)]],
+            rowSeparator = [True] * 2),
             end="")
         print(tabulated([
             ["",            "Count"],
             ["Directories", grouped(numDirs)],
             ["Files",       grouped(numFiles)]],
             numHeaderRows = 1,
-            columnAlign = ['left'] + ['right'] * 1),
+            columnAlign = ['left'] + ['right'] * 1,
+            rowSeparator = [True] * 3),
             end="")
         print(tabulated([
             ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
@@ -172,7 +177,26 @@ def main():
             ["Groups",                                     grouped(numGroups),         "-",                           "-"],
             ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
             numHeaderRows = 1,
-            columnAlign = ['left'] + ['right'] * 3),
+            columnAlign = ['left'] + ['right'] * 3,
+            rowSeparator = [True] * 6),
+            end="")
+    if action == 'list':
+        data = [["Group", "Name", "Location"]]
+        groupEnd = [True]
+        for item in items:
+            if item.kind == Kind.copy:
+                if prevItem.kind == Kind.master:
+                    groupEnd[-1] = True
+                    data.append(["Master", printable(prevItem.name), printable(prevItem.location)])
+                    groupEnd.append(False)
+                data.append([grouped(item.group), printable(item.name), printable(item.location)])
+                groupEnd.append(False)
+            prevItem = item
+        groupEnd[-1] = True
+        print(tabulated(data,
+            numHeaderRows = 1,
+            columnAlign = ['right'] + ['left'] * 2,
+            rowSeparator = groupEnd),
             end="")
     
     if VERBOSE:
@@ -189,6 +213,12 @@ def main():
 if '__main__' == __name__:
     main()
 
+# separator at end e.g. header row but no data rows
+#['location', 'name', 'time', 'size', 'group', 'kind']
+# scanning progress: chop of top dir
+# master pick/selection: first alpha
+# dius printable _ -> ?
+# argparse VS pipe redirect
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
