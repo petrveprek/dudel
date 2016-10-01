@@ -5,7 +5,7 @@
 import argparse, collections, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.1"
+VERSION = "0.2"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
@@ -56,7 +56,8 @@ def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     rowFmt = "".join([char if char != "^" else "<" for char in headerFmt])
     return rowSep + "".join(
         (headerFmt if row < numHeaderRows else rowFmt).format(*table[row]) + \
-        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") \
+        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") +
+        (rowSep if numHeaderRows == numRows else "") \
         for row in range(numRows))
 
 def main():
