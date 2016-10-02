@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, collections, enum, os, string, sys, time
+import argparse, collections, datetime, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
 VERSION = "0.2"
@@ -41,6 +41,9 @@ def format(num, mode=Mode.plain):
         grouped(num)   if mode == Mode.grouped   else
         gazillion(num) if mode == Mode.gazillion else
         plain(num))
+
+def timestamp(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")
 
 def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     numRows = len(table)
@@ -182,21 +185,21 @@ def main():
             rowSeparator = [True] * 6),
             end="")
     if action == 'list':
-        data = [["Group", "Name", "Location"]]
+        data = [["Group", "Name", "Location", "Time", "Size"]]
         groupEnd = [True]
         for item in items:
             if item.kind == Kind.copy:
                 if prevItem.kind == Kind.master:
                     groupEnd[-1] = True
-                    data.append(["Master", printable(prevItem.name), printable(prevItem.location)])
+                    data.append(["Master", printable(prevItem.name), printable(prevItem.location), timestamp(prevItem.time), gazillion(prevItem.size)])
                     groupEnd.append(False)
-                data.append([grouped(item.group), printable(item.name), printable(item.location)])
+                data.append([grouped(item.group), printable(item.name), printable(item.location), timestamp(item.time), gazillion(item.size)])
                 groupEnd.append(False)
             prevItem = item
         groupEnd[-1] = True
         print(tabulated(data,
             numHeaderRows = 1,
-            columnAlign = ['right'] + ['left'] * 2,
+            columnAlign = ['right'] + ['left'] * 2 + ['right'] * 2,
             rowSeparator = groupEnd),
             end="")
     
@@ -214,12 +217,11 @@ def main():
 if '__main__' == __name__:
     main()
 
-# separator at end e.g. header row but no data rows
-#['location', 'name', 'time', 'size', 'group', 'kind']
 # scanning progress: chop of top dir
 # master pick/selection: first alpha
 # dius printable _ -> ?
 # argparse VS pipe redirect
+# ansi escape (progress ehm..)
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)

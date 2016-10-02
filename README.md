@@ -6,7 +6,7 @@ __*dudel*__ -- **_du_**plicate **_del_**ete
 
 ```
 >dudel.py -h
-Duplicate Delete 0.1
+Duplicate Delete 0.2
 usage: dudel.py [-h] [-a {summary,list}]
                 [-m {name,time,size} [{name,time,size} ...]]
                 [-t {file,directory}] [-s] [-w <12,180>]
@@ -37,7 +37,7 @@ optional arguments:
 
 ```
 >dudel.py \Windows\SysWOW64\InstallShield -s -a list
-Duplicate Delete 0.1
+Duplicate Delete 0.2
 +-----------+-----------------------------------+
 | Directory | \Windows\SysWOW64\InstallShield   |
 +-----------+-----------------------------------+
@@ -63,43 +63,43 @@ Duplicate Delete 0.1
 +------------+-------+----------+---------+
 | Max extra  |     7 |        - |       - |
 +------------+-------+----------+---------+
-+--------+------------+-------------------------------------------------+
-|  Group | Name       | Location                                        |
-+========+============+=================================================+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0011 |
-|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0012 |
-|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0013 |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0014 |
-|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0021 |
-|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0024 |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0005 |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0006 |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0009 |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001a |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001d |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\002d |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0404 |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0804 |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0007 |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0019 |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001b |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0416 |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0816 |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0003 |
-|      5 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0008 |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000b |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001f |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\040c |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0c0c |
-+--------+------------+-------------------------------------------------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000e |
-|      7 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001e |
-+--------+------------+-------------------------------------------------+
++--------+------------+-------------------------------------------------+----------------------------+---------+
+|  Group | Name       | Location                                        |                       Time |    Size |
++========+============+=================================================+============================+=========+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0011 | 2016-07-16 12:42:45.436913 |   34KiB |
+|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0012 | 2016-07-16 12:42:45.436913 |   34KiB |
+|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0013 | 2016-07-16 12:42:45.436913 |   34KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0014 | 2016-07-16 12:42:45.436913 | 34.5KiB |
+|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0021 | 2016-07-16 12:42:45.436913 | 34.5KiB |
+|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0024 | 2016-07-16 12:42:45.436913 | 34.5KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0005 | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0006 | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0009 | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001a | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001d | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\002d | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0404 | 2016-07-16 12:42:46.405661 |   34KiB |
+|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0804 | 2016-07-16 12:42:46.405661 |   34KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0007 | 2016-07-16 12:42:46.405661 | 34.5KiB |
+|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0019 | 2016-07-16 12:42:46.405661 | 34.5KiB |
+|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001b | 2016-07-16 12:42:46.405661 | 34.5KiB |
+|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0416 | 2016-07-16 12:42:46.405661 | 34.5KiB |
+|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0816 | 2016-07-16 12:42:46.405661 | 34.5KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0003 | 2016-07-16 12:42:46.405661 |   35KiB |
+|      5 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0008 | 2016-07-16 12:42:46.405661 |   35KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000b | 2016-07-16 12:42:46.421286 |   34KiB |
+|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001f | 2016-07-16 12:42:46.421286 |   34KiB |
+|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\040c | 2016-07-16 12:42:46.421286 |   34KiB |
+|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0c0c | 2016-07-16 12:42:46.421286 |   34KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
+| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000e | 2016-07-16 12:42:46.421286 | 34.5KiB |
+|      7 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001e | 2016-07-16 12:42:46.421286 | 34.5KiB |
++--------+------------+-------------------------------------------------+----------------------------+---------+
 ```
 
 Copyright (c) 2016 Petr Vepřek
