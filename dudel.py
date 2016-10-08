@@ -2,16 +2,17 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, collections, enum, os, string, sys, time
+import argparse, collections, colorama, datetime, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.1"
+VERSION = "0.2"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
 MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
 WIDTH = MAX_WIDTH
 WIDTH = min(max(WIDTH, MIN_WIDTH), MAX_WIDTH)
+ANSI_CURSOR_UP = "\033[A"
 
 def now(on="on", at="at"):
     return "{}{} {}{}".format(
@@ -42,6 +43,9 @@ def format(num, mode=Mode.plain):
         gazillion(num) if mode == Mode.gazillion else
         plain(num))
 
+def timestamp(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S.%f")
+
 def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     numRows = len(table)
     numCols = len(table[0])
@@ -56,10 +60,12 @@ def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
     rowFmt = "".join([char if char != "^" else "<" for char in headerFmt])
     return rowSep + "".join(
         (headerFmt if row < numHeaderRows else rowFmt).format(*table[row]) + \
-        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") \
+        ((headerSep if row < numHeaderRows else rowSep) if row == numRows-1 or row < len(rowSeparator) and rowSeparator[row] else "") +
+        (rowSep if numHeaderRows == numRows else "") \
         for row in range(numRows))
 
 def main():
+    colorama.init()
     print("{} {}".format(TITLE, VERSION))
     if VERBOSE:
         print("\a", end="")
@@ -86,7 +92,7 @@ def main():
     
     if not silent:
         print("Scanning {} under {}".format("files" if type == "file" else "directories", directory))
-        BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
+        BACKTRACK = ("\r" if width < MAX_WIDTH else ANSI_CURSOR_UP) if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
     class Kind(enum.Enum): master = 0; copy = 1
@@ -94,7 +100,7 @@ def main():
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
-            print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=BACKTRACK)
+            print("Scanning {: <{}}".format(printable(path[len(directory):], width-9), width-9), end=BACKTRACK)
         dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.abspath(os.path.join(path, dir)),  dirs)))
         files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
@@ -172,8 +178,8 @@ def main():
         print(tabulated([
             ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
             ["Total",                                      grouped(numUniqs+numDups),  gazillion(sizeUniqs+sizeDups), "100.0%"],
-            ["Unique",                                     grouped(numUniqs),          gazillion(sizeUniqs),          "{:.1%}".format(sizeUniqs/(sizeUniqs+sizeDups))],
-            ["Duplicated",                                 grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups))],
+            ["Unique",                                     grouped(numUniqs),          gazillion(sizeUniqs),          "{:.1%}".format(sizeUniqs/(sizeUniqs+sizeDups) if sizeUniqs+sizeDups != 0 else 0)],
+            ["Duplicated",                                 grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups) if sizeUniqs+sizeDups != 0 else 0)],
             ["Groups",                                     grouped(numGroups),         "-",                           "-"],
             ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
             numHeaderRows = 1,
@@ -181,21 +187,21 @@ def main():
             rowSeparator = [True] * 6),
             end="")
     if action == 'list':
-        data = [["Group", "Name", "Location"]]
+        data = [["Group", "Name", "Location", "Time", "Size"]]
         groupEnd = [True]
         for item in items:
             if item.kind == Kind.copy:
                 if prevItem.kind == Kind.master:
                     groupEnd[-1] = True
-                    data.append(["Master", printable(prevItem.name), printable(prevItem.location)])
+                    data.append(["Master", printable(prevItem.name), printable(prevItem.location), timestamp(prevItem.time), gazillion(prevItem.size)])
                     groupEnd.append(False)
-                data.append([grouped(item.group), printable(item.name), printable(item.location)])
+                data.append([grouped(item.group), printable(item.name), printable(item.location), timestamp(item.time), gazillion(item.size)])
                 groupEnd.append(False)
             prevItem = item
         groupEnd[-1] = True
         print(tabulated(data,
             numHeaderRows = 1,
-            columnAlign = ['right'] + ['left'] * 2,
+            columnAlign = ['right'] + ['left'] * 2 + ['right'] * 2,
             rowSeparator = groupEnd),
             end="")
     
@@ -213,12 +219,8 @@ def main():
 if '__main__' == __name__:
     main()
 
-# separator at end e.g. header row but no data rows
-#['location', 'name', 'time', 'size', 'group', 'kind']
-# scanning progress: chop of top dir
-# master pick/selection: first alpha
+# master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
-# argparse VS pipe redirect
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
