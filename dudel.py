@@ -5,7 +5,7 @@
 import argparse, collections, colorama, datetime, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.2"
+VERSION = "0.3"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
@@ -78,8 +78,8 @@ def main():
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
     parser.add_argument("-a", "--action", choices=['summary', 'list'], default='summary', help="set action to perform on found items [%(default)s]")
-    parser.add_argument("-m", "--match", nargs="+", choices=['name', 'time', 'size'], default=['name', 'time', 'size'], help="set criteria to detect duplicate items ["+" ".join(['name', 'time', 'size'])+"]")
-    parser.add_argument("-t", "--type", choices=["file", "directory"], default="file", help="set type of items to be searched for and deleted [%(default)s]")
+    parser.add_argument("-m", "--match", nargs="+", choices=['name', 'time', 'size', 'contents'], default=['name', 'time', 'size', 'contents'], help="set criteria to detect duplicate items ["+" ".join(['name', 'time', 'size', 'contents'])+"]")
+    parser.add_argument("-t", "--type", choices=['file', 'directory'], default='file', help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
     parser.add_argument("-w", "--width", type=int, choices=range(MIN_WIDTH,MAX_WIDTH+1), default=WIDTH, metavar="<{},{}>".format(MIN_WIDTH,MAX_WIDTH), help="set console width for progress indicator [%(default)s]")
     arguments = parser.parse_args()
@@ -91,7 +91,7 @@ def main():
     width = arguments.width
     
     if not silent:
-        print("Scanning {} under {}".format("files" if type == "file" else "directories", directory))
+        print("Scanning {} under {}".format("files" if type == 'file' else "directories", directory))
         BACKTRACK = ("\r" if width < MAX_WIDTH else ANSI_CURSOR_UP) if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
@@ -105,7 +105,7 @@ def main():
         files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
         numFiles += len(files)
-        for element in files if type == "file" else dirs:
+        for element in files if type == 'file' else dirs:
             location, name = os.path.split(element)
             mtime = os.path.getmtime(element)
             size = os.path.getsize(element)
@@ -122,13 +122,15 @@ def main():
             grouped(dirRate),  "y" if dirRate  == 1 else "ies",
             grouped(fileRate), ""  if fileRate == 1 else "s"))
     
+    if not silent:
+        print("Sorting and grouping items")
     items.sort(key=lambda item:
-        ((item.name,) if "name" in match else ()) +
-        ((item.time,) if "time" in match else ()) +
-        ((item.size,) if "size" in match else ()) +
-        ((item.name,) if "name" not in match else ()) +
-        ((item.time,) if "time" not in match else ()) +
-        ((item.size,) if "size" not in match else ()) +
+        ((item.name,) if 'name' in match else ()) +
+        ((item.time,) if 'time' in match else ()) +
+        ((item.size,) if 'size' in match else ()) +
+        ((item.name,) if 'name' not in match else ()) +
+        ((item.time,) if 'time' not in match else ()) +
+        ((item.size,) if 'size' not in match else ()) +
         ((item.location,)))
     numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
     if len(items) > 0:
@@ -137,9 +139,9 @@ def main():
         items[0] = items[0]._replace(group=0, kind=Kind.master)
         prevItem = items[0]
         for index, item in enumerate(items[1:]):
-            if ("name" not in match or item.name == prevItem.name) and \
-               ("time" not in match or item.time == prevItem.time) and \
-               ("size" not in match or item.size == prevItem.size):
+            if ('name' not in match or item.name == prevItem.name) and \
+               ('time' not in match or item.time == prevItem.time) and \
+               ('size' not in match or item.size == prevItem.size):
                 numDups += 1
                 if extra == 0:
                     numGroups += 1
@@ -219,6 +221,7 @@ def main():
 if '__main__' == __name__:
     main()
 
+# [1] match content  [2] color  [3] pick=shallow...  [4] action=rename
 # master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
