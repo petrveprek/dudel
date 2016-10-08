@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, collections, datetime, enum, os, string, sys, time
+import argparse, collections, colorama, datetime, enum, os, string, sys, time
 
 TITLE = "Duplicate Delete"
 VERSION = "0.2"
@@ -12,6 +12,7 @@ MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
 MAX_WIDTH = os.get_terminal_size().columns if sys.stdout.isatty() else 80
 WIDTH = MAX_WIDTH
 WIDTH = min(max(WIDTH, MIN_WIDTH), MAX_WIDTH)
+ANSI_CURSOR_UP = "\033[A"
 
 def now(on="on", at="at"):
     return "{}{} {}{}".format(
@@ -64,6 +65,7 @@ def tabulated(table, numHeaderRows=0, columnAlign=[], rowSeparator=[]):
         for row in range(numRows))
 
 def main():
+    colorama.init()
     print("{} {}".format(TITLE, VERSION))
     if VERBOSE:
         print("\a", end="")
@@ -90,7 +92,7 @@ def main():
     
     if not silent:
         print("Scanning {} under {}".format("files" if type == "file" else "directories", directory))
-        BACKTRACK = ("\r" if width < MAX_WIDTH else "\033[F") if sys.stdout.isatty() else "\n"
+        BACKTRACK = ("\r" if width < MAX_WIDTH else ANSI_CURSOR_UP) if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
     class Kind(enum.Enum): master = 0; copy = 1
@@ -218,10 +220,8 @@ if '__main__' == __name__:
     main()
 
 # scanning progress: chop of top dir
-# master pick/selection: first alpha
+# master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
-# argparse VS pipe redirect
-# ansi escape (progress ehm..)
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
 # --find unique/duplicate(multiple)
