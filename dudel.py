@@ -89,9 +89,10 @@ def main():
     type = arguments.type
     silent = arguments.silent
     width = arguments.width
+    types = {'sing.': "file", 'plur.': "files"} if type == 'file' else {'sing.': "directory", 'plur.': "directories"}
     
     if not silent:
-        print("Scanning {} under {}".format("files" if type == 'file' else "directories", directory))
+        print("Scanning {} under {}".format(types['plur.'], directory))
         BACKTRACK = ("\r" if width < MAX_WIDTH else ANSI_CURSOR_UP) if sys.stdout.isatty() else "\n"
     started = time.time()
     numDirs, numFiles = (0,) * 2
@@ -123,7 +124,7 @@ def main():
             grouped(fileRate), ""  if fileRate == 1 else "s"))
     
     if not silent:
-        print("Sorting and grouping items")
+        print("Sorting and grouping {}".format(types['plur.']))
     items.sort(key=lambda item:
         ((item.name,) if 'name' in match else ()) +
         ((item.time,) if 'time' in match else ()) +
@@ -156,12 +157,16 @@ def main():
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
-        print("Found {} total item{} ({}), {} unique item{} ({}), {} duplicated item{} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
-            grouped(len(items)), ""  if len(items) == 1 else "s", gazillion(sizeUniqs+sizeDups),
-            grouped(numUniqs),   ""  if numUniqs   == 1 else "s", gazillion(sizeUniqs),
-            grouped(numDups),    ""  if numDups    == 1 else "s", gazillion(sizeDups),
+        print("Found {} total {} ({}), {} unique {} ({}), {} duplicated {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+            grouped(len(items)), types['sing.'  if len(items) == 1 else 'plur.'], gazillion(sizeUniqs+sizeDups),
+            grouped(numUniqs),   types['sing.'  if numUniqs   == 1 else 'plur.'], gazillion(sizeUniqs),
+            grouped(numDups),    types['sing.'  if numDups    == 1 else 'plur.'], gazillion(sizeDups),
             grouped(numGroups),  ""  if numGroups  == 1 else "s",
             grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
+    
+    if 'contents' in match:
+        if not silent:
+            print("Matching {} contents".format(types['sing.']))
     
     if action in ['summary', 'list']:
         print(tabulated([
@@ -221,7 +226,7 @@ def main():
 if '__main__' == __name__:
     main()
 
-# [1] match content  [2] color  [3] pick=shallow...  [4] action=rename
+# [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename
 # master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
