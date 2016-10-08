@@ -100,7 +100,7 @@ def main():
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
-            print("Scanning {: <{}}".format(printable(path, width-9), width-9), end=BACKTRACK)
+            print("Scanning {: <{}}".format(printable(path[len(directory):], width-9), width-9), end=BACKTRACK)
         dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.abspath(os.path.join(path, dir)),  dirs)))
         files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
@@ -219,7 +219,6 @@ def main():
 if '__main__' == __name__:
     main()
 
-# scanning progress: chop of top dir
 # master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
