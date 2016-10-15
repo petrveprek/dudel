@@ -153,7 +153,7 @@ def main():
                 numUniqs += 1
                 extra = 0
                 sizeUniqs += item.size
-            items[index] = item._replace(group=0 if extra == 0 else numGroups, kind=Kind.master if extra == 0 else Kind.copy)
+            items[1+index] = item._replace(group=0 if extra == 0 else numGroups, kind=Kind.master if extra == 0 else Kind.copy)
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
