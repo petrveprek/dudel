@@ -6,9 +6,9 @@ __*dudel*__ -- **_du_**plicate **_del_**ete
 
 ```
 >dudel.py -h
-Duplicate Delete 0.2
+Duplicate Delete 0.3
 usage: dudel.py [-h] [-a {summary,list}]
-                [-m {name,time,size} [{name,time,size} ...]]
+                [-m {name,time,size,contents} [{name,time,size,contents} ...]]
                 [-t {file,directory}] [-s] [-w <12,180>]
                 [directory]
 
@@ -22,9 +22,9 @@ optional arguments:
   -h, --help            show this help message and exit
   -a {summary,list}, --action {summary,list}
                         set action to perform on found items [summary]
-  -m {name,time,size} [{name,time,size} ...], --match {name,time,size} [{name,time,size} ...]
-                        set criteria to detect duplicate items [name time
-                        size]
+  -m {name,time,size,contents} [{name,time,size,contents} ...], --match {name,time,size,contents} [{name,time,size,contents} ...]
+                        set criteria to detect duplicate items [name time size
+                        contents]
   -t {file,directory}, --type {file,directory}
                         set type of items to be searched for and deleted
                         [file]
@@ -36,70 +36,44 @@ optional arguments:
 # Example
 
 ```
->dudel.py \Windows\SysWOW64\InstallShield -s -a list
-Duplicate Delete 0.2
-+-----------+-----------------------------------+
-| Directory | \Windows\SysWOW64\InstallShield   |
-+-----------+-----------------------------------+
-| Full path | C:\Windows\SysWOW64\InstallShield |
-+-----------+-----------------------------------+
+>dudel.py \Windows\SysWOW64 -a list
+Duplicate Delete 0.3
+Scanning files under \Windows\SysWOW64
+Found 350 directories with 5,644 files in 2 seconds (175.0 directories/s, 2,822.0 files/s)
+Sorting and grouping files
+Found 5,644 total files (1.4GiB), 5,511 unique files (1.4GiB), 133 duplicated files (2.9MiB), 67 groups with repeats, max 7 extra copies in a group
+Matching file contents
++-----------+---------------------+
+| Directory | \Windows\SysWOW64   |
++-----------+---------------------+
+| Full path | C:\Windows\SysWOW64 |
++-----------+---------------------+
 +-------------+-------+
 |             | Count |
 +=============+=======+
-| Directories |    31 |
+| Directories |   350 |
 +-------------+-------+
-| Files       |    33 |
+| Files       | 5,644 |
 +-------------+-------+
-+------------+-------+----------+---------+
-| Files      | Count |     Size | Percent |
-+============+=======+==========+=========+
-| Total      |    33 |   1.1MiB |  100.0% |
-+------------+-------+----------+---------+
-| Unique     |    13 | 448.5KiB |   39.6% |
-+------------+-------+----------+---------+
-| Duplicated |    20 | 684.5KiB |   60.4% |
-+------------+-------+----------+---------+
-| Groups     |     7 |        - |       - |
-+------------+-------+----------+---------+
-| Max extra  |     7 |        - |       - |
-+------------+-------+----------+---------+
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-|  Group | Name       | Location                                        |                       Time |    Size |
-+========+============+=================================================+============================+=========+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0011 | 2016-07-16 12:42:45.436913 |   34KiB |
-|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0012 | 2016-07-16 12:42:45.436913 |   34KiB |
-|      1 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0013 | 2016-07-16 12:42:45.436913 |   34KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0014 | 2016-07-16 12:42:45.436913 | 34.5KiB |
-|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0021 | 2016-07-16 12:42:45.436913 | 34.5KiB |
-|      2 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0024 | 2016-07-16 12:42:45.436913 | 34.5KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0005 | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0006 | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0009 | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001a | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001d | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\002d | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0404 | 2016-07-16 12:42:46.405661 |   34KiB |
-|      3 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0804 | 2016-07-16 12:42:46.405661 |   34KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0007 | 2016-07-16 12:42:46.405661 | 34.5KiB |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0019 | 2016-07-16 12:42:46.405661 | 34.5KiB |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001b | 2016-07-16 12:42:46.405661 | 34.5KiB |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0416 | 2016-07-16 12:42:46.405661 | 34.5KiB |
-|      4 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0816 | 2016-07-16 12:42:46.405661 | 34.5KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0003 | 2016-07-16 12:42:46.405661 |   35KiB |
-|      5 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0008 | 2016-07-16 12:42:46.405661 |   35KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000b | 2016-07-16 12:42:46.421286 |   34KiB |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001f | 2016-07-16 12:42:46.421286 |   34KiB |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\040c | 2016-07-16 12:42:46.421286 |   34KiB |
-|      6 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\0c0c | 2016-07-16 12:42:46.421286 |   34KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
-| Master | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\000e | 2016-07-16 12:42:46.421286 | 34.5KiB |
-|      7 | _setup.dll | C:\Windows\SysWOW64\InstallShield\setupdir\001e | 2016-07-16 12:42:46.421286 | 34.5KiB |
-+--------+------------+-------------------------------------------------+----------------------------+---------+
++------------+-------+---------+---------+
+| Files      | Count |    Size | Percent |
++============+=======+=========+=========+
+| Total      | 5,644 |  1.4GiB |  100.0% |
++------------+-------+---------+---------+
+| Unique     | 5,643 |  1.4GiB |  100.0% |
++------------+-------+---------+---------+
+| Duplicated |     1 | 35.9KiB |    0.0% |
++------------+-------+---------+---------+
+| Groups     |     1 |       - |       - |
++------------+-------+---------+---------+
+| Max extra  |     1 |       - |       - |
++------------+-------+---------+---------+
++--------+-------------+--------------------------------------------------+----------------------------+---------+
+|  Group | Name        | Location                                         |                       Time |    Size |
++========+=============+==================================================+============================+=========+
+| Master | license.rtf | C:\Windows\SysWOW64                              | 2016-07-16 15:12:49.070815 | 35.9KiB |
+|      1 | license.rtf | C:\Windows\SysWOW64\en-US\Licenses\_Default\Core | 2016-07-16 15:12:49.070815 | 35.9KiB |
++--------+-------------+--------------------------------------------------+----------------------------+---------+
 ```
 
 Copyright (c) 2016 Petr Vepřek
