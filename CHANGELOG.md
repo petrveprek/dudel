@@ -1,6 +1,7 @@
 # v0.3
-2016/10/15
-- Fixed bug
+2016/10/16
+- Added contents matching
+- Fixed bugs
 
 # v0.2
 2016/10/8

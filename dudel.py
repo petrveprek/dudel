@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, collections, colorama, datetime, enum, os, string, sys, time
+import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time
 
 TITLE = "Duplicate Delete"
 VERSION = "0.3"
@@ -168,6 +168,82 @@ def main():
     if 'contents' in match:
         if not silent:
             print("Matching {} contents".format(types['sing.']))
+#        print(items)
+#        print('BEFORE', numUniqs, numDups, numGroups, maxExtra)
+#        numDups, numGroups, maxExtra, sizeDups = (0,) * 4
+        begin = 0 # first item in pre-qualified group
+        while begin < len(items):
+#            print('begin', begin, items[begin].group, items[begin].kind)
+            end = begin # last item in pre-qualified group
+            while end < len(items)-1 and items[end+1].kind == Kind.copy:
+                end += 1
+#                print('end', end, items[end].group, items[end].kind)
+            if begin < end:
+#                print('\t', 'from', begin, 'to', end, 'group', items[end].group, 'count', end-begin+1)
+                assert items[begin].kind == Kind.master
+                assert items[end].kind == Kind.copy
+                first = begin # first in confirmed group
+                while first <= end:
+#                    print('\t', 'first', first, items[first].group, items[first].kind, items[first].location, items[first].name)
+                    last = first # first in confirmed group
+                    while last <= end-1 and filecmp.cmp(
+                        os.path.join(items[first].location, items[first].name),
+                        os.path.join(items[last+1].location, items[last+1].name),
+                        shallow=False):
+                        last += 1
+#                        print('\t', 'last', last, items[last].group, items[last].kind, items[last].location, items[last].name)
+                    items[first] = items[first]._replace(kind=Kind.master)
+                    for dup in range(first+1, last+1):
+                        items[dup] = items[dup]._replace(kind=Kind.copy)
+#                    if items[first].kind != Kind.master:
+#                        assert(items[first].group != 0)
+#                        print('FIRST ->MASTER')
+#                        numUniqs  += 1
+#                        numDups   -= 1
+#                        # if prev==master then numGroups--
+#                        # ? maxExtra
+#                        sizeUniqs += items[first].size
+#                        sizeDups  -= items[first].size
+#                        items[first] = item._replace(group=0, kind=Kind.master)
+####    numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
+#### mark first as master -- before updating group&kind, compare and fixup counts/sizes...
+#### mark first+1 to last as copy -- before updating group&kind, compare and fixup counts/sizes...
+#### 
+#### 
+#### 
+# WAS    [begin, end]    1 group
+# NOW    first = master    [first+1, last] = copy
+# !! compare NEW and OLD state, use is to update uniq/dup/etc counts/sizes/etc
+#                    if first == last:
+# numDups
+# numGroups
+# maxExtra
+# sizeDups
+# !!numUniqs UPDATE!!
+# !!sizeUniqs UPDATE!!
+#                    items[1+index] = item._replace(group=0 if extra == 0 else numGroups, kind=Kind.master if extra == 0 else Kind.copy)
+                    first = last + 1
+            begin = end + 1
+#    print(items)
+#    print('BEFORE', numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups)
+    numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
+    for index, item in enumerate(items):
+        if item.kind == Kind.master:
+            numUniqs += 1
+            sizeUniqs += item.size
+            extra = 0
+            items[index] = item._replace(group=0)
+        else:
+            assert item.kind == Kind.copy
+            numDups +=1
+            sizeDups += item.size
+            if extra == 0:
+                numGroups += 1
+            extra += 1
+            maxExtra = max(extra, maxExtra)
+            items[index] = item._replace(group=numGroups)
+#    print('AFTER ', numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups)
+#    print(items)
     
     if action in ['summary', 'list']:
         print(tabulated([
@@ -200,6 +276,7 @@ def main():
         for item in items:
             if item.kind == Kind.copy:
                 if prevItem.kind == Kind.master:
+                    assert prevItem.group == 0
                     groupEnd[-1] = True
                     data.append(["Master", printable(prevItem.name), printable(prevItem.location), timestamp(prevItem.time), gazillion(prevItem.size)])
                     groupEnd.append(False)
@@ -227,7 +304,7 @@ def main():
 if '__main__' == __name__:
     main()
 
-# [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename
+# [?=okay] filecmp compater not only contents but also os.stat()  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
 # master pick/selection: alpha/shortest/shallowest-path
 # dius printable _ -> ?
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
