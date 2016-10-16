@@ -136,6 +136,7 @@ def main():
     numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
     if len(items) > 0:
         numUniqs = 1
+        sizeUniqs = items[0].size
         extra = 0
         items[0] = items[0]._replace(group=0, kind=Kind.master)
         prevItem = items[0]
