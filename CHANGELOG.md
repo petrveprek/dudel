@@ -1,3 +1,8 @@
+# v0.4
+2016/10/22
+- Added contents match statistics
+- Optimized code
+
 # v0.3
 2016/10/16
 - Added contents matching

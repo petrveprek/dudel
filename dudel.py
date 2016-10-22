@@ -5,7 +5,7 @@
 import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.3"
+VERSION = "0.4"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
@@ -205,6 +205,14 @@ def main():
                 extra += 1
                 maxExtra = max(extra, maxExtra)
                 items[index] = item._replace(group=numGroups)
+        assert numUniqs + numDups == len(items)
+        if not silent:
+            print("Found {} total {} ({}), {} unique {} ({}), {} duplicated {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+                grouped(len(items)), types['sing.'  if len(items) == 1 else 'plur.'], gazillion(sizeUniqs+sizeDups),
+                grouped(numUniqs),   types['sing.'  if numUniqs   == 1 else 'plur.'], gazillion(sizeUniqs),
+                grouped(numDups),    types['sing.'  if numDups    == 1 else 'plur.'], gazillion(sizeDups),
+                grouped(numGroups),  ""  if numGroups  == 1 else "s",
+                grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
     if action in ['summary', 'list']:
         print(tabulated([
