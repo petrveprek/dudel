@@ -176,9 +176,9 @@ def main():
             if begin < end:
                 assert items[begin].kind == Kind.master
                 assert items[end].kind == Kind.copy
-                first = begin # first in confirmed group
+                first = begin # first item in confirmed group
                 while first <= end:
-                    last = first # first in confirmed group
+                    last = first # last item in confirmed group
                     while last <= end-1 and filecmp.cmp(
                         os.path.join(items[first].location, items[first].name),
                         os.path.join(items[last+1].location, items[last+1].name),
@@ -265,7 +265,7 @@ def main():
 if '__main__' == __name__:
     main()
 
-# [?=okay] filecmp compater not only contents but also os.stat()  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
+#  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
 # master pick/selection: alpha/shortest/shallowest-path
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
