@@ -189,22 +189,22 @@ def main():
                         items[dup] = items[dup]._replace(kind=Kind.copy)
                     first = last + 1
             begin = end + 1
-    numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
-    for index, item in enumerate(items):
-        if item.kind == Kind.master:
-            numUniqs += 1
-            sizeUniqs += item.size
-            extra = 0
-            items[index] = item._replace(group=0)
-        else:
-            assert item.kind == Kind.copy
-            numDups +=1
-            sizeDups += item.size
-            if extra == 0:
-                numGroups += 1
-            extra += 1
-            maxExtra = max(extra, maxExtra)
-            items[index] = item._replace(group=numGroups)
+        numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
+        for index, item in enumerate(items):
+            if item.kind == Kind.master:
+                numUniqs += 1
+                sizeUniqs += item.size
+                extra = 0
+                items[index] = item._replace(group=0)
+            else:
+                assert item.kind == Kind.copy
+                numDups +=1
+                sizeDups += item.size
+                if extra == 0:
+                    numGroups += 1
+                extra += 1
+                maxExtra = max(extra, maxExtra)
+                items[index] = item._replace(group=numGroups)
     
     if action in ['summary', 'list']:
         print(tabulated([
