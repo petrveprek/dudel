@@ -1,5 +1,6 @@
 # v0.5
 2016/10/28
+- Added master and copy counts per path
 - Improved progress reporting
 
 # v0.4

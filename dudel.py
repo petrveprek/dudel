@@ -101,7 +101,7 @@ def main():
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
-            print("Scanning {: <{}}".format(printable(path[len(directory):], width-9), width-9), end=BACKTRACK)
+            print("Scanning {: <{}}".format(printable(path[len(directory):] if path[len(directory):] != "" else "\\.", width-9), width-9), end=BACKTRACK)
         dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.abspath(os.path.join(path, dir)),  dirs)))
         files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
@@ -240,6 +240,27 @@ def main():
             columnAlign = ['left'] + ['right'] * 3,
             rowSeparator = [True] * 6),
             end="")
+        Location = collections.namedtuple('Location', ['masters', 'copies'])
+        location = {}
+        for item in items:
+            if item.kind == Kind.copy:
+                if prevItem.kind == Kind.master:
+                    assert prevItem.group == 0
+                    if prevItem.location not in location.keys():
+                        location[prevItem.location] = Location(masters=0, copies=0)
+                    location[prevItem.location] = location[prevItem.location]._replace(masters=location[prevItem.location].masters+1)
+                if item.location not in location.keys():
+                    location[item.location] = Location(masters=0, copies=0)
+                location[item.location] = location[item.location]._replace(copies=location[item.location].copies+1)
+            prevItem = item
+        data = [["Location", "Master count", "Copy count"]]
+        for path in sorted(location.keys(), key=lambda path: (-location[path].masters, -location[path].copies, path)):
+            data.append([printable(path), grouped(location[path].masters), grouped(location[path].copies)])
+        print(tabulated(data,
+            numHeaderRows = 1,
+            columnAlign = ['left'] + ['right'] * 2,
+            rowSeparator = [True]),
+            end="")
     if action == 'list':
         data = [["Group", "Name", "Location", "Time", "Size"]]
         groupEnd = [True]
@@ -274,7 +295,6 @@ def main():
 if '__main__' == __name__:
     main()
 
-# for master+copy locations, show file counts
 #  [?] to list, add md5/sha/crc  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
 # master pick/selection: alpha/shortest/shallowest-path
 # printable: return string.encode(sys.stdout.encoding, errors='replace')

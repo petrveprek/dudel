@@ -39,7 +39,7 @@ optional arguments:
 >dudel.py \Windows\SysWOW64 -a list
 Duplicate Delete 0.5
 Scanning files under \Windows\SysWOW64
-Found 350 directories with 5,644 files in 3 seconds (116.7 directories/s, 1,881.3 files/s)
+Found 350 directories with 5,644 files in 2 seconds (175.0 directories/s, 2,822.0 files/s)
 Sorting and grouping files
 Found 5,644 total files (1.4GiB), 5,511 unique files (1.4GiB), 133 duplicate files (2.9MiB), 67 groups with repeats, max 7 extra copies in a group
 Matching file contents
@@ -69,6 +69,12 @@ Found 5,644 total files (1.4GiB), 5,643 unique files (1.4GiB), 1 duplicate file 
 +-----------+-------+---------+---------+
 | Max extra |     1 |       - |       - |
 +-----------+-------+---------+---------+
++--------------------------------------------------+--------------+------------+
+| Location                                         | Master count | Copy count |
++==================================================+==============+============+
+| C:\Windows\SysWOW64                              |            1 |          0 |
+| C:\Windows\SysWOW64\en-US\Licenses\_Default\Core |            0 |          1 |
++--------------------------------------------------+--------------+------------+
 +--------+-------------+--------------------------------------------------+----------------------------+---------+
 |  Group | Name        | Location                                         |                       Time |    Size |
 +========+=============+==================================================+============================+=========+
