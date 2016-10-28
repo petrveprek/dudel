@@ -5,7 +5,7 @@
 import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.4"
+VERSION = "0.5"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
@@ -101,7 +101,7 @@ def main():
     items = []
     for path, dirs, files in os.walk(directory):
         if not silent:
-            print("Scanning {: <{}}".format(printable(path[len(directory):], width-9), width-9), end=BACKTRACK)
+            print("Scanning {: <{}}".format(printable(path[len(directory):] if path[len(directory):] != "" else "\\.", width-9), width-9), end=BACKTRACK)
         dirs  = list(filter(os.path.isdir,  map(lambda dir:  os.path.abspath(os.path.join(path, dir)),  dirs)))
         files = list(filter(os.path.isfile, map(lambda file: os.path.abspath(os.path.join(path, file)), files)))
         numDirs  += len(dirs)
@@ -112,7 +112,8 @@ def main():
             size = os.path.getsize(element)
             items.append(Item(location=location, name=name, time=mtime, size=size, group=None, kind=None))
     if not silent:
-        print("         {: <{}}".format("", width-9), end=BACKTRACK)
+        if sys.stdout.isatty():
+            print("         {: <{}}".format("", width-9), end=BACKTRACK)
         seconds = max(1, round(time.time() - started))
         dirRate  = round(numDirs  / seconds, 1)
         fileRate = round(numFiles / seconds, 1)
@@ -158,7 +159,7 @@ def main():
             prevItem = item
     assert numUniqs + numDups == len(items)
     if not silent:
-        print("Found {} total {} ({}), {} unique {} ({}), {} duplicated {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+        print("Found {} total {} ({}), {} unique {} ({}), {} duplicate {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
             grouped(len(items)), types['sing.'  if len(items) == 1 else 'plur.'], gazillion(sizeUniqs+sizeDups),
             grouped(numUniqs),   types['sing.'  if numUniqs   == 1 else 'plur.'], gazillion(sizeUniqs),
             grouped(numDups),    types['sing.'  if numDups    == 1 else 'plur.'], gazillion(sizeDups),
@@ -207,7 +208,7 @@ def main():
                 items[index] = item._replace(group=numGroups)
         assert numUniqs + numDups == len(items)
         if not silent:
-            print("Found {} total {} ({}), {} unique {} ({}), {} duplicated {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
+            print("Found {} total {} ({}), {} unique {} ({}), {} duplicate {} ({}), {} group{} with repeats, max {} extra cop{} in a group".format(
                 grouped(len(items)), types['sing.'  if len(items) == 1 else 'plur.'], gazillion(sizeUniqs+sizeDups),
                 grouped(numUniqs),   types['sing.'  if numUniqs   == 1 else 'plur.'], gazillion(sizeUniqs),
                 grouped(numDups),    types['sing.'  if numDups    == 1 else 'plur.'], gazillion(sizeDups),
@@ -232,12 +233,33 @@ def main():
             ["Files" if type == "file" else "Directories", "Count",                    "Size",                        "Percent"],
             ["Total",                                      grouped(numUniqs+numDups),  gazillion(sizeUniqs+sizeDups), "100.0%"],
             ["Unique",                                     grouped(numUniqs),          gazillion(sizeUniqs),          "{:.1%}".format(sizeUniqs/(sizeUniqs+sizeDups) if sizeUniqs+sizeDups != 0 else 0)],
-            ["Duplicated",                                 grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups) if sizeUniqs+sizeDups != 0 else 0)],
+            ["Duplicate",                                  grouped(numDups),           gazillion(sizeDups),           "{:.1%}".format(sizeDups/(sizeUniqs+sizeDups) if sizeUniqs+sizeDups != 0 else 0)],
             ["Groups",                                     grouped(numGroups),         "-",                           "-"],
             ["Max extra",                                  grouped(maxExtra),          "-",                           "-"]],
             numHeaderRows = 1,
             columnAlign = ['left'] + ['right'] * 3,
             rowSeparator = [True] * 6),
+            end="")
+        Location = collections.namedtuple('Location', ['masters', 'copies'])
+        location = {}
+        for item in items:
+            if item.kind == Kind.copy:
+                if prevItem.kind == Kind.master:
+                    assert prevItem.group == 0
+                    if prevItem.location not in location.keys():
+                        location[prevItem.location] = Location(masters=0, copies=0)
+                    location[prevItem.location] = location[prevItem.location]._replace(masters=location[prevItem.location].masters+1)
+                if item.location not in location.keys():
+                    location[item.location] = Location(masters=0, copies=0)
+                location[item.location] = location[item.location]._replace(copies=location[item.location].copies+1)
+            prevItem = item
+        data = [["Location", "Master count", "Copy count"]]
+        for path in sorted(location.keys(), key=lambda path: (-location[path].masters, -location[path].copies, path)):
+            data.append([printable(path), grouped(location[path].masters), grouped(location[path].copies)])
+        print(tabulated(data,
+            numHeaderRows = 1,
+            columnAlign = ['left'] + ['right'] * 2,
+            rowSeparator = [True]),
             end="")
     if action == 'list':
         data = [["Group", "Name", "Location", "Time", "Size"]]
@@ -273,7 +295,7 @@ def main():
 if '__main__' == __name__:
     main()
 
-#  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
+#  [?] to list, add md5/sha/crc  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
 # master pick/selection: alpha/shortest/shallowest-path
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
