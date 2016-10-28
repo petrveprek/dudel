@@ -1,3 +1,7 @@
+# v0.5
+2016/10/28
+- Improved progress reporting
+
 # v0.4
 2016/10/22
 - Added contents match statistics
