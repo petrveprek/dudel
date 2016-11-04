@@ -1,3 +1,7 @@
+# v0.6
+2016/11/4
+- Added matching progress
+
 # v0.5
 2016/10/28
 - Added master and copy counts per path

@@ -6,7 +6,7 @@ __*dudel*__ -- **_du_**plicate **_del_**ete
 
 ```
 >dudel.py -h
-Duplicate Delete 0.5
+Duplicate Delete 0.6
 usage: dudel.py [-h] [-a {summary,list}]
                 [-m {name,time,size,contents} [{name,time,size,contents} ...]]
                 [-t {file,directory}] [-s] [-w <12,180>]
@@ -37,7 +37,7 @@ optional arguments:
 
 ```
 >dudel.py \Windows\SysWOW64 -a list
-Duplicate Delete 0.5
+Duplicate Delete 0.6
 Scanning files under \Windows\SysWOW64
 Found 350 directories with 5,644 files in 2 seconds (175.0 directories/s, 2,822.0 files/s)
 Sorting and grouping files

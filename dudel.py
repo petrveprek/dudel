@@ -5,7 +5,7 @@
 import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time
 
 TITLE = "Duplicate Delete"
-VERSION = "0.5"
+VERSION = "0.6"
 VERBOSE = False
 class Mode(enum.Enum): plain = 0; grouped = 1; gazillion = 2
 MIN_WIDTH = 9+0+3 # intro + directory + ellipsis
@@ -171,6 +171,8 @@ def main():
             print("Matching {} contents".format(types['sing.']))
         begin = 0 # first item in pre-qualified group
         while begin < len(items):
+            if not silent:
+                print("Matching {: <{}}".format("{} of {}".format(grouped(begin), grouped(len(items))), width-9), end=BACKTRACK)
             end = begin # last item in pre-qualified group
             while end < len(items)-1 and items[end+1].kind == Kind.copy:
                 end += 1
@@ -190,6 +192,9 @@ def main():
                         items[dup] = items[dup]._replace(kind=Kind.copy)
                     first = last + 1
             begin = end + 1
+        if not silent:
+            if sys.stdout.isatty():
+                print("         {: <{}}".format("", width-9), end=BACKTRACK)
         numUniqs, numDups, numGroups, maxExtra, sizeUniqs, sizeDups = (0,) * 6
         for index, item in enumerate(items):
             if item.kind == Kind.master:
@@ -296,6 +301,10 @@ if '__main__' == __name__:
     main()
 
 #  [?] to list, add md5/sha/crc  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
+# add confirm for deletions
+# add count >MAX_PATH (260)
+# add progress during contents matching (use percent of dupes, not percent of total items)
+# do group match: all at once? (current one-to-next may miss dups and require multiple passes)
 # master pick/selection: alpha/shortest/shallowest-path
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
 # dudel master inspect (when several file copies exist, keep the ones (even multiple) in master directory, delete all from inspect directory)
