@@ -170,9 +170,10 @@ def main():
         if not silent:
             print("Matching {} contents".format(types['sing.']))
         begin = 0 # first item in pre-qualified group
+        uniq = 1
         while begin < len(items):
             if not silent:
-                print("Matching {: <{}}".format("{} of {}".format(grouped(begin), grouped(len(items))), width-9), end=BACKTRACK)
+                print("Matching {: <{}}".format("{} of {}".format(grouped(uniq), grouped(numUniqs)), width-9), end=BACKTRACK)
             end = begin # last item in pre-qualified group
             while end < len(items)-1 and items[end+1].kind == Kind.copy:
                 end += 1
@@ -192,6 +193,7 @@ def main():
                         items[dup] = items[dup]._replace(kind=Kind.copy)
                     first = last + 1
             begin = end + 1
+            uniq += 1
         if not silent:
             if sys.stdout.isatty():
                 print("         {: <{}}".format("", width-9), end=BACKTRACK)

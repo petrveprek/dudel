@@ -1,5 +1,5 @@
 # v0.6
-2016/11/4
+2016/11/5
 - Added matching progress
 
 # v0.5
