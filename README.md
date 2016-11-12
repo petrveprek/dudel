@@ -6,8 +6,8 @@ __*dudel*__ -- **_du_**plicate **_del_**ete
 
 ```
 >dudel.py -h
-Duplicate Delete 0.5
-usage: dudel.py [-h] [-a {summary,list}]
+Duplicate Delete 0.6
+usage: dudel.py [-h] [-a {summary,list,delete}]
                 [-m {name,time,size,contents} [{name,time,size,contents} ...]]
                 [-t {file,directory}] [-s] [-w <12,180>]
                 [directory]
@@ -20,7 +20,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -a {summary,list}, --action {summary,list}
+  -a {summary,list,delete}, --action {summary,list,delete}
                         set action to perform on found items [summary]
   -m {name,time,size,contents} [{name,time,size,contents} ...], --match {name,time,size,contents} [{name,time,size,contents} ...]
                         set criteria to detect duplicate items [name time size
@@ -37,7 +37,7 @@ optional arguments:
 
 ```
 >dudel.py \Windows\SysWOW64 -a list
-Duplicate Delete 0.5
+Duplicate Delete 0.6
 Scanning files under \Windows\SysWOW64
 Found 350 directories with 5,644 files in 2 seconds (175.0 directories/s, 2,822.0 files/s)
 Sorting and grouping files
@@ -82,6 +82,11 @@ Found 5,644 total files (1.4GiB), 5,643 unique files (1.4GiB), 1 duplicate file 
 |      1 | license.rtf | C:\Windows\SysWOW64\en-US\Licenses\_Default\Core | 2016-07-16 15:12:49.070815 | 35.9KiB |
 +--------+-------------+--------------------------------------------------+----------------------------+---------+
 ```
+
+# Warning
+
+**Achtung! Action `delete` may result in files being DELETED.** It is highly recommended to first use `list` action  and
+review the list of found duplicate items.
 
 Copyright (c) 2016 Petr Vepřek
 
