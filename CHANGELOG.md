@@ -1,5 +1,6 @@
 # v0.6
-2016/11/5
+2016/11/12
+- Added delete action
 - Added matching progress
 
 # v0.5

@@ -2,7 +2,7 @@
 # Copyright (c) 2016 Petr Veprek
 """Duplicate Delete"""
 
-import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time
+import argparse, collections, colorama, datetime, enum, filecmp, os, string, sys, time, winshell
 
 TITLE = "Duplicate Delete"
 VERSION = "0.6"
@@ -77,7 +77,7 @@ def main():
     
     parser = argparse.ArgumentParser(description="Finds and deletes duplicate files located under top `directory`.")
     parser.add_argument("directory", nargs="?", default=os.getcwd(), help="set top directory to clean up [%(default)s]")
-    parser.add_argument("-a", "--action", choices=['summary', 'list'], default='summary', help="set action to perform on found items [%(default)s]")
+    parser.add_argument("-a", "--action", choices=['summary', 'list', 'delete'], default='summary', help="set action to perform on found items [%(default)s]")
     parser.add_argument("-m", "--match", nargs="+", choices=['name', 'time', 'size', 'contents'], default=['name', 'time', 'size', 'contents'], help="set criteria to detect duplicate items ["+" ".join(['name', 'time', 'size', 'contents'])+"]")
     parser.add_argument("-t", "--type", choices=['file', 'directory'], default='file', help="set type of items to be searched for and deleted [%(default)s]")
     parser.add_argument("-s", "--silent", action="store_true", default=False, help="suppress progress messages [false]")
@@ -222,7 +222,7 @@ def main():
                 grouped(numGroups),  ""  if numGroups  == 1 else "s",
                 grouped(maxExtra),   "y" if maxExtra   == 1 else "ies"))
     
-    if action in ['summary', 'list']:
+    if action in ['summary', 'list', 'delete']:
         print(tabulated([
             ["Directory", directory],
             ["Full path", os.path.abspath(directory)]],
@@ -268,7 +268,7 @@ def main():
             columnAlign = ['left'] + ['right'] * 2,
             rowSeparator = [True]),
             end="")
-    if action == 'list':
+    if action in ['list', 'delete']:
         data = [["Group", "Name", "Location", "Time", "Size"]]
         groupEnd = [True]
         for item in items:
@@ -278,8 +278,31 @@ def main():
                     groupEnd[-1] = True
                     data.append(["Master", printable(prevItem.name), printable(prevItem.location), timestamp(prevItem.time), gazillion(prevItem.size)])
                     groupEnd.append(False)
+                    if action == 'delete':
+                        masterName     = prevItem.name
+                        masterLocation = prevItem.location
+                        master = os.path.join(masterLocation, masterName)
                 data.append([grouped(item.group), printable(item.name), printable(item.location), timestamp(item.time), gazillion(item.size)])
                 groupEnd.append(False)
+                if action == 'delete':
+                    copyName     = item.name
+                    copyLocation = item.location
+                    copy = os.path.join(copyLocation, copyName)
+                    link = copy + '.link'
+                    try:
+                        with open(link, 'w') as link:
+                            link.write(master) # Precaution #1: Create a link to the master.
+                    except:
+                        try:
+                            print('Failed to create link to master')
+                        except:
+                            pass
+                    else:
+                        winshell.delete_file(copy, no_confirm=True) # Precaution #2: Move copy to the recycle bin.
+                        try:
+                            print('Deleted "', copy, '"')
+                        except:
+                            pass
             prevItem = item
         groupEnd[-1] = True
         print(tabulated(data,
@@ -305,7 +328,6 @@ if '__main__' == __name__:
 #  [?] to list, add md5/sha/crc  [!] if not silent report rematch result  [1] match contents  [2] color  [3] pick=shallow...  [4] action=rename  [5] graphic border
 # add confirm for deletions
 # add count >MAX_PATH (260)
-# add progress during contents matching (use percent of dupes, not percent of total items)
 # do group match: all at once? (current one-to-next may miss dups and require multiple passes)
 # master pick/selection: alpha/shortest/shallowest-path
 # printable: return string.encode(sys.stdout.encoding, errors='replace')
